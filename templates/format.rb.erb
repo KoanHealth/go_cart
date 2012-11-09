@@ -1,0 +1,37 @@
+
+class <%= @class_name %>Format < GoCart::Format
+
+	def initialize
+		super<% format.tables.each do |symbol, table| %>
+		create_table <%= table.get_parameters %> do |t|<% table.fields.each do |symbol, field| %>
+			t.<%= field.type %> <%= field.get_parameters %><% end %>
+		end<% end %>
+	end
+
+end
+
+class <%= @class_name %>Schema < GoCart::Schema
+
+	def initialize
+		super<% schema.tables.each do |symbol, table| %>
+		create_table <%= table.get_parameters %> do |t|<% table.fields.each do |symbol, field| %>
+			t.<%= field.type %> <%= field.get_parameters %><% end %>
+		end<% end %>
+	end
+
+end
+
+class <%= @class_name %>Mapper < GoCart::Mapper
+
+	attr_accessor :format, :schema
+
+	def initialize
+		super(<%= @class_name %>Format.new, <%= @class_name %>Schema.new)<% format.tables.each do |symbol, table| %>
+		create_mapping <%= table.symbol.inspect %>, to => schema.<%= table.symbol %>, from => format.<%= table.symbol %> do |m|<% table.fields.each do |symbol, field| %>
+			m.map <%= field.symbol.inspect %>, <%= field.symbol.inspect %><% end %>
+		end<% end %>
+	end
+
+end
+
+GoCart::Mapper.register <%= @class_name %>Mapper
