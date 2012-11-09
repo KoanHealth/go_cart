@@ -1,6 +1,5 @@
-require 'rspec'
+require 'spec_helper'
 require 'date'
-require_relative '../lib/go_cart.rb'
 
 describe "Extract Values" do
 

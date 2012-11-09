@@ -1,7 +1,6 @@
-require 'rubygems'
 require 'tempfile'
-require_relative 'dialect_mysql'
-require_relative 'dialect_postgresql'
+require 'go_cart/dialect_mysql'
+require 'go_cart/dialect_postgresql'
 
 module GoCart
 class Runner

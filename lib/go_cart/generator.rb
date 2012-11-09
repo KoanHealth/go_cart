@@ -1,8 +1,4 @@
-require 'rubygems'
 require 'csv'
-require_relative 'type_utils'
-require_relative 'file_utils'
-require_relative 'format_file_writer'
 
 module GoCart
 class Generator

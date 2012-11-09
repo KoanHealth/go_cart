@@ -1,4 +1,4 @@
-require_relative 'data_utils'
+require 'go_cart/data_utils'
 
 module GoCart
 

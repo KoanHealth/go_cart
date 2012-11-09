@@ -1,7 +1,4 @@
-require 'rubygems'
 require 'active_record'
-
-require_relative 'target'
 
 module GoCart
 class TargetDb < Target

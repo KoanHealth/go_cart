@@ -1,4 +1,3 @@
-require 'rubygems'
 require 'active_record'
 require 'activerecord-import'
 require 'logger'

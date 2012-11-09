@@ -1,7 +1,4 @@
-require 'rubygems'
 require 'csv'
-
-require_relative 'target'
 
 module GoCart
 class TargetFile < Target

@@ -1,6 +1,5 @@
-require 'rubygems'
 require 'erb'
-require_relative '../go_cart'
+require 'go_cart/file_utils'
 
 module GoCart
 class FormatFileWriter
