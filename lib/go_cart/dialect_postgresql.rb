@@ -11,7 +11,7 @@ class DialectPostgresql
 		field_separator = "\\t"
 		columns = schema_table.get_columns()
 
-		return<<-END_OF_QUERY
+		return <<-END_OF_QUERY
 			COPY #{table_name} (
 			#{columns.map { |symbol| "\"#{symbol}\"" }.join(',')}
 			) FROM '#{filename}'

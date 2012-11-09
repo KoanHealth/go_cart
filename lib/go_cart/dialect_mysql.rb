@@ -11,7 +11,7 @@ class DialectMySql
 		field_separator = "\\t"
 		columns = schema_table.get_columns()
 
-		return<<-END_OF_QUERY
+		return <<-END_OF_QUERY
 			LOAD DATA INFILE '#{filename}'
 			INTO TABLE #{table_name}
 			FIELDS TERMINATED BY '#{field_separator}'
