@@ -1,4 +1,4 @@
-require 'command/gocart_def'
+require_relative 'gocart_def'
 
 module GoCart
 class GoCartGen < GoCartDef
@@ -17,7 +17,7 @@ class GoCartGen < GoCartDef
 	end
 
 	def setup_generator(generator)
-		template_directory = File.join(@script_dir, '../templates')
+		template_directory = File.join(@script_dir, '../../templates')
 		generator.template_directory = template_directory
 		generator.module_name = @module_name
 		generator.class_name = @class_name

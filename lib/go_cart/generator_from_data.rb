@@ -1,7 +1,4 @@
 require 'csv'
-require 'gocart/type_utils'
-require 'gocart/file_utils'
-require 'gocart/format_file_writer'
 
 module GoCart
 class GeneratorFromData < Generator

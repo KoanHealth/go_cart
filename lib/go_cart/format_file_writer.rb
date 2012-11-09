@@ -1,5 +1,4 @@
 require 'erb'
-require 'go_cart/file_utils'
 
 module GoCart
 class FormatFileWriter

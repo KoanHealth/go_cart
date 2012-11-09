@@ -1,7 +1,7 @@
 #! /usr/bin/env ruby
 require 'rubygems'
 require 'optparse'
-require 'command/gocart_all'
+require_relative 'command/gocart_all'
 
 module GoCart
 class Main

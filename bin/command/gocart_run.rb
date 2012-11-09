@@ -1,6 +1,6 @@
 require 'rubygems'
 require 'yaml'
-require 'command/gocart_def'
+require_relative 'gocart_def'
 
 module GoCart
 class GoCartRun < GoCartDef
@@ -93,7 +93,7 @@ private
 
   def get_dbconfig
 		@environment = @environment || 'development'
-		dbconfig = YAML::load(File.open(File.join(@script_dir,'../config','database.yml')))[@environment]
+		dbconfig = YAML::load(File.open(File.join(@script_dir,'../../config','database.yml')))[@environment]
 		dbconfig['database'] = @database unless @database.nil?
     dbconfig['adapter']  = @adapter  unless @adapter.nil?
 		dbconfig['username'] = @username unless @username.nil?

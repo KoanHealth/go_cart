@@ -23,8 +23,8 @@ class Runner
 		mapper = get_mapper
 
 		Dir.glob(data_file).each do |file|
-			if @table_name.nil? && FileUtils.has_headers?(file)
-				headers = FileUtils.get_headers(file)
+			if @table_name.nil? && GoCart::FileUtils.has_headers?(file)
+				headers = GoCart::FileUtils.get_headers(file)
 				format_table = mapper.format.identify_table(headers)
 				raise "Unrecognized headers in file #{file}" if format_table.nil?
 			elsif !@table_name.nil?
