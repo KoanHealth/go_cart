@@ -5,7 +5,7 @@ require_relative 'gocart_def'
 module GoCart
 class GoCartRun < GoCartDef
 
-	attr_accessor :data_file, :format_file, :mapper_name, :table_name, :just_create
+	attr_accessor :data_file, :format_file, :mapper_name, :table_name, :suffix, :just_create
 	attr_accessor :environment, :adapter, :database, :username, :password
 	attr_accessor :bulk_load, :bulk_filename, :use_import
 
@@ -19,6 +19,7 @@ class GoCartRun < GoCartDef
 		options[:bulk_load] = @bulk_load unless @bulk_load.nil?
 		options[:bulk_filename] = @bulk_filename unless @bulk_filename.nil?
 		options[:use_import] = @use_import unless @use_import.nil?
+		options[:suffix] = @suffix unless @suffix.nil?
 
 		if @just_create
       runner.create_tables_only(dbconfig, options)
@@ -73,6 +74,10 @@ class GoCartRun < GoCartDef
 
 		opts.on('--file FILENAME', 'bulk-load filename (output)') do |value|
 			@bulk_filename = value
+		end
+
+		opts.on('--suffix SUFFIX', 'suffix table name to make it unique') do |value|
+			@suffix = value
 		end
 
 		opts.on('--load', 'perform bulk-load') do |value|

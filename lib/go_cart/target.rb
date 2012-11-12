@@ -5,13 +5,17 @@ require 'logger'
 module GoCart
 class Target
 
-	# TBD
+	attr_accessor :suffix
+
+	def get_table_name(symbol)
+		return @suffix.nil? ? symbol : (symbol.to_s + @suffix).to_sym
+	end
 
 protected
 
 	def open_database_connection(dbconfig)
 		ActiveRecord::Base.establish_connection(dbconfig)
-		ActiveRecord::Base.logger = Logger.new(STDERR) if @verbose
+		#ActiveRecord::Base.logger = Logger.new(STDERR)
 	end
 
 	def create_database(dbconfig)
@@ -19,18 +23,19 @@ protected
 	end
 
 	def create_tables(mapper)
-		migrator = SchemaMigrator.new mapper.schema
+		migrator = SchemaMigrator.new mapper.schema, @suffix
 		migrator.up
 	end
 
-	def create_activerecord_class table_name  
+	def create_activerecord_class table_name
+		full_table_name = get_table_name(table_name)
 		Class.new(ActiveRecord::Base) do
-			self.table_name = table_name
+			self.table_name = full_table_name
 		end  
 	end
 
 	def drop_tables(mapper)
-		migrator = SchemaMigrator.new mapper.schema
+		migrator = SchemaMigrator.new mapper.schema, @suffix
 		migrator.down
 	end
 

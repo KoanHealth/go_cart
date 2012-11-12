@@ -35,10 +35,11 @@ class TargetFile < Target
 	def import(dbconfig, mapper, schema_table)
 		open_database_connection dbconfig
 		begin
-			unless ActiveRecord::Base.connection.table_exists? schema_table.symbol
+			table_name = get_table_name(schema_table.symbol)
+			unless ActiveRecord::Base.connection.table_exists? table_name
 				create_tables mapper
 			end
-			ActiveRecord::Base.connection.execute @dialect.generate_command(schema_table, @filename)
+			ActiveRecord::Base.connection.execute @dialect.generate_command(schema_table, table_name, @filename)
 		ensure
 			close_database_connection
 		end

@@ -6,8 +6,7 @@ class DialectPostgresql
       return row
 	end
 
-	def generate_command(schema_table, filename)
-		table_name = schema_table.symbol
+	def generate_command(schema_table, table_name, filename)
 		field_separator = "\\t"
 		columns = schema_table.get_columns()
 
