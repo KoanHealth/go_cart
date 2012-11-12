@@ -6,7 +6,7 @@ module GoCart
 class Runner
 
 	attr_accessor :format_file, :mapper_name, :table_name
-	attr_accessor :bulk_load, :bulk_filename
+	attr_accessor :bulk_load, :bulk_filename, :use_import
 
 	def initialize(format_file)
 		@format_file = format_file
@@ -16,7 +16,7 @@ class Runner
 	  load_options options
 
 	  # begin
-		require @format_file
+	  Dir.glob(@format_file) { |file| require file }
 	  # end
 
 		file_count = 0
@@ -96,6 +96,7 @@ private
 		@table_name = options[:table_name]
 		@bulk_load = options[:bulk_load]
 		@bulk_filename = options[:bulk_filename]
+		@use_import = options[:use_import]
 	end
 
   def get_mapper
@@ -109,7 +110,7 @@ private
  		end
 
  		mapper_class = Mapper.get_last_mapper_class
- 		raise "Please specify mapper class (ie. MyModule::MyMapper)" if mapper_class.nil?
+ 		raise "Must specify mapper class (ie. MyModule::MyMapper)" if mapper_class.nil?
  		return mapper_class.new
  	end
 

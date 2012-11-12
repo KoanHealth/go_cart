@@ -7,7 +7,7 @@ class GoCartRun < GoCartDef
 
 	attr_accessor :data_file, :format_file, :mapper_name, :table_name, :just_create
 	attr_accessor :environment, :adapter, :database, :username, :password
-	attr_accessor :bulk_load, :bulk_filename
+	attr_accessor :bulk_load, :bulk_filename, :use_import
 
 	def execute()
 		dbconfig = get_dbconfig
@@ -18,6 +18,7 @@ class GoCartRun < GoCartDef
 		options[:table_name] = @table_name unless @table_name.nil?
 		options[:bulk_load] = @bulk_load unless @bulk_load.nil?
 		options[:bulk_filename] = @bulk_filename unless @bulk_filename.nil?
+		options[:use_import] = @use_import unless @use_import.nil?
 
 		if @just_create
       runner.create_tables_only(dbconfig, options)
@@ -78,6 +79,10 @@ class GoCartRun < GoCartDef
   		@bulk_load = true
   	end
 
+		opts.on('--import', 'use ActiveRecord import') do |value|
+  		@use_import = true
+  	end
+
    	opts.on('--create', 'just create database tables') do |value|
   		@just_create = true
   	end
@@ -86,7 +91,8 @@ class GoCartRun < GoCartDef
 
 		# Verify arguments
 		abort_err('An input file is required.', opts) if @data_file.nil? && !@just_create
-    	abort_err('A format file is required.', opts) if @format_file.nil?
+		abort_err('A format file is required.', opts) if @format_file.nil?
+		abort_err('Flag --load conflicts with --import.', opts) if @bulk_load && @use_import
 	end
 
 private

@@ -4,12 +4,13 @@ $LOAD_PATH.unshift(lib) unless $LOAD_PATH.include?(lib)
 require 'go_cart/version'
 
 Gem::Specification.new do |gem|
-	gem.name = 'GoCart'
+	gem.name = 'go_cart'
   gem.version = GoCart::VERSION
 	gem.authors = ["Brad Smalling"]
 	gem.email = ["brad smalling @ koanhealth com"]
 	gem.homepage = 'https://github.com/KoanHealth/gocart'
-	gem.summary = 'GoCart is a ruby library for flat-file field loading.'
+	gem.summary = 'Load flat-files into database tables.'
+	gem.description = 'GoCart is a ruby library for flat-file field loading.'
 
 	gem.files = `git ls-files`.split($/)
 	gem.executables = ['gocart.rb']
