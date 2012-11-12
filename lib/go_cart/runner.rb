@@ -34,7 +34,8 @@ class Runner
 			else
 				raise "Must specify a table name"
 			end
-			schema_table = mapper.schema.tables[format_table.symbol]
+			schema_table = mapper.get_schema_for_format(format_table)
+			raise "Cannot find schema mapping for #{format_table.symbol}" if schema_table.nil?
 
 			if format_table.fixed_length
 				loader = LoaderFromFixed.new
