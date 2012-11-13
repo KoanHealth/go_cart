@@ -6,6 +6,10 @@ class DialectMySql
       return row.map { |field| field.nil? ? "\\N" : field }
 	end
 
+	def execute_command(connection, schema_table, table_name, filename)
+		connection.execute generate_command(schema_table, table_name, filename)
+	end
+
 	def generate_command(schema_table, table_name, filename)
 		field_separator = "\\t"
 		columns = schema_table.get_columns()
