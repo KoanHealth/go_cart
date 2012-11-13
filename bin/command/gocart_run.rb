@@ -24,7 +24,7 @@ class GoCartRun < GoCartDef
 		if @just_create
       runner.create_tables_only(dbconfig, options)
     else
-      runner.load_data(dbconfig, @data_file, options)
+      runner.load_data(dbconfig, Dir.glob(@data_file), options)
 	  end
   end
 

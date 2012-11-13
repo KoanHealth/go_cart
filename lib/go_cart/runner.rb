@@ -12,7 +12,7 @@ class Runner
 		@format_file = format_file
 	end
 
-  def load_data(dbconfig, data_file, options = {})
+	def load_data(dbconfig, data_files, options = {})
 	  load_options options
 
 	  # begin
@@ -22,7 +22,7 @@ class Runner
 		file_count = 0
 		mapper = get_mapper
 
-		Dir.glob(data_file).each do |file|
+		data_files.each do |file|
 			if @table_name.nil? && GoCart::FileUtils.has_headers?(file)
 				headers = GoCart::FileUtils.get_headers(file)
 				format_table = mapper.format.identify_table(headers)
@@ -64,7 +64,7 @@ class Runner
 			file_count += 1
 		end
 
-		raise "File not found: #{data_file}" if file_count <= 0
+		raise "File not found: #{data_files}" if file_count <= 0
 	end
 
   def create_tables_only(dbconfig, options = {})
