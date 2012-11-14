@@ -5,17 +5,24 @@ require 'activerecord-import'
 module GoCart
 class Target
 
-	attr_accessor :suffix
+	attr_accessor :suffix, :schema
 
 	def get_table_name(symbol)
 		return @suffix.nil? ? symbol : (symbol.to_s + @suffix).to_sym
 	end
 
-protected
-
 	def open_database_connection(dbconfig)
 		ActiveRecord::Base.establish_connection(dbconfig)
 		#ActiveRecord::Base.logger = Logger.new(STDERR)
+		unless @schema.nil?
+			unless ActiveRecord::Base.connection.schema_exists?(@schema)
+				ActiveRecord::Base.connection.execute "CREATE SCHEMA #{@schema};"
+				# CREATE SCHEMA #{@schema};
+				# SET search_path TO #{@schema};
+				# DROP SCHEMA #{@schema} CASCADE;
+			end
+			ActiveRecord::Base.connection.schema_search_path = "#{@schema},public"
+		end
 	end
 
 	def create_database(dbconfig)

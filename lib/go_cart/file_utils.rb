@@ -9,8 +9,8 @@ class FileUtils
   MAX_LINE_LENGTH = 50000
 
   def self.has_headers?(input_file)
-     eol_char = get_eol_char(input_file)
- 		File.open(input_file, 'r').each(eol_char) do |line|
+		eol_char = get_eol_char(input_file)
+		File.open(input_file, 'r').each(eol_char) do |line|
  			next if line =~ /^\s*$/
  			line.chomp!
 

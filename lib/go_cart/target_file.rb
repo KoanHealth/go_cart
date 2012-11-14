@@ -39,7 +39,7 @@ class TargetFile < Target
 			unless ActiveRecord::Base.connection.table_exists? table_name
 				create_tables mapper
 			end
-			@dialect.execute_command(ActiveRecord::Base.connection, schema_table, table_name, @filename)
+			@dialect.load_from_file(ActiveRecord::Base.connection, schema_table, table_name, @filename)
 		ensure
 			close_database_connection
 		end

@@ -5,8 +5,8 @@ require_relative 'gocart_def'
 module GoCart
 class GoCartRun < GoCartDef
 
-	attr_accessor :data_file, :format_file, :mapper_name, :table_name, :suffix, :just_create
-	attr_accessor :environment, :adapter, :database, :username, :password
+	attr_accessor :data_file, :format_file, :mapper_name, :table_names, :suffix, :just_create
+	attr_accessor :environment, :adapter, :database, :username, :password, :schema
 	attr_accessor :bulk_load, :bulk_filename, :use_import
 
 	def execute()
@@ -15,7 +15,7 @@ class GoCartRun < GoCartDef
 
 		options = Hash.new
 		options[:mapper_name] = @mapper_name unless @mapper_name.nil?
-		options[:table_name] = @table_name unless @table_name.nil?
+		options[:table_names] = @table_names unless @table_names.nil?
 		options[:bulk_load] = @bulk_load unless @bulk_load.nil?
 		options[:bulk_filename] = @bulk_filename unless @bulk_filename.nil?
 		options[:use_import] = @use_import unless @use_import.nil?
@@ -48,8 +48,8 @@ class GoCartRun < GoCartDef
 			@mapper_name = value
 		end
 
-		opts.on('--table TABLENAME', 'table name') do |value|
-			@table_name = value
+		opts.on('--tables TABLENAME[,TABLENAME...]', 'table name') do |value|
+			@table_names = value.gsub(/^[\"\']/,'').gsub(/[\"\']$/,'').split(/\s*,\s*/)
 		end
 
 		opts.on('--env ENVIRONMENT', 'configuration environment') do |value|
@@ -70,6 +70,10 @@ class GoCartRun < GoCartDef
 
 		opts.on('--password PASSWORD', 'database password') do |value|
 			@password = value
+		end
+
+		opts.on('--schema SCHEMAPATH', 'PostgreSQL schema search path') do |value|
+			@schema = value
 		end
 
 		opts.on('--file FILENAME', 'bulk-load filename (output)') do |value|
@@ -109,6 +113,7 @@ private
     dbconfig['adapter']  = @adapter  unless @adapter.nil?
 		dbconfig['username'] = @username unless @username.nil?
 		dbconfig['password'] = @password unless @password.nil?
+		dbconfig['schema_search_path'] = @schema unless @schema.nil?
 		return dbconfig
 	end
 

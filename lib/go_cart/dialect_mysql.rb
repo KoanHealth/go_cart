@@ -6,11 +6,17 @@ class DialectMySql
       return row.map { |field| field.nil? ? "\\N" : field }
 	end
 
-	def execute_command(connection, schema_table, table_name, filename)
-		connection.execute generate_command(schema_table, table_name, filename)
+	def load_from_file(connection, schema_table, table_name, filename)
+		connection.execute generate_load_command(schema_table, table_name, filename)
 	end
 
-	def generate_command(schema_table, table_name, filename)
+	def save_to_file(connection, schema_table, table_name, filename)
+		connection.execute generate_save_command(schema_table, table_name, filename)
+	end
+
+private
+
+	def generate_load_command(schema_table, table_name, filename)
 		field_separator = "\\t"
 		columns = schema_table.get_columns()
 
@@ -21,6 +27,18 @@ class DialectMySql
 			IGNORE 1 LINES (
 			#{columns.map { |symbol| "`#{symbol}`" }.join(',')}
 			)
+		END_OF_QUERY
+	end
+
+	def generate_save_command(schema_table, table_name, filename)
+		field_separator = "\\t"
+		columns = schema_table.get_columns()
+
+		return <<-END_OF_QUERY
+			SELECT #{columns.map { |symbol| "`#{symbol}`" }.join(',')}
+			INTO OUTFILE '#{filename}'
+			FIELDS TERMINATED BY '#{field_separator}'
+			FROM #{table_name}
 		END_OF_QUERY
 	end
 

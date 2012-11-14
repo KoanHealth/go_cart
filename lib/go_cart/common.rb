@@ -22,16 +22,7 @@ class CommonBase
 
 	def identify_table(headers)
 		@tables.each do |symbol, table|
-			if headers.size == table.fields.size
-				isMatch = true
-				table.fields.each do |symbol, field|
-					unless headers.include? field.header
-						isMatch = false
-						break
-					end
-				end
-				return table if isMatch
-			end
+			return table if table.matches?(headers)
 		end
 		return nil
 	end
@@ -82,6 +73,16 @@ class CommonTable
 			columns << symbol
 		end
 		return columns
+	end
+
+	def matches?(headers)
+		if headers.size >= @fields.size
+			@fields.each do |symbol, field|
+				return false unless headers.include? field.header
+			end
+			return true
+		end
+		return false
 	end
 
 	def string(symbol, options = {})

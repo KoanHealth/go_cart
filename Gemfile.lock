@@ -1,7 +1,7 @@
 PATH
   remote: .
   specs:
-    go_cart (0.0.4)
+    go_cart (0.0.5)
       activerecord
       activerecord-import
       rake
