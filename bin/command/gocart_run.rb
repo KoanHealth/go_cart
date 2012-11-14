@@ -20,6 +20,7 @@ class GoCartRun < GoCartDef
 		options[:bulk_filename] = @bulk_filename unless @bulk_filename.nil?
 		options[:use_import] = @use_import unless @use_import.nil?
 		options[:suffix] = @suffix unless @suffix.nil?
+		options[:schema] = @schema unless @schema.nil?
 
 		if @just_create
       runner.create_tables_only(dbconfig, options)
@@ -113,7 +114,6 @@ private
     dbconfig['adapter']  = @adapter  unless @adapter.nil?
 		dbconfig['username'] = @username unless @username.nil?
 		dbconfig['password'] = @password unless @password.nil?
-		dbconfig['schema_search_path'] = @schema unless @schema.nil?
 		return dbconfig
 	end
 

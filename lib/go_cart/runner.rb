@@ -40,7 +40,7 @@ class Runner
             @bulk_filename = Tempfile.new('gocart')
             bulk_delete = true
           end
-          target = TargetFile.new get_dialect(dbconfig), @bulk_filename
+          target = TargetFile.new self.class.get_dialect(dbconfig), @bulk_filename
         else
           target = TargetDb.new dbconfig
         end
@@ -50,7 +50,7 @@ class Runner
         loader.load(file, mapper, format_table, schema_table, target)
         target.import(dbconfig, mapper, schema_table) if @bulk_load
       ensure
-  			target.delete if bulk_delete
+  			target.delete if bulk_delete unless target.nil?
       end
 			file_count += 1
 		end
@@ -58,11 +58,18 @@ class Runner
 		raise "File not found: #{data_files}" if file_count <= 0
 	end
 
+	def self.save_data(dbconfig, schema_table, filename, options = {})
+		target = Target.new()
+	  target.suffix = options[:suffix]
+	  target.schema = options[:schema]
+	  target.save_table(dbconfig, get_dialect(dbconfig), schema_table, filename)
+	end
+
   def create_tables_only(dbconfig, options = {})
 	  load_options options
 
 	  # begin
-    require @format_file
+	  Dir.glob(@format_file) { |file| require file }
 	  # end
 
  		mapper = get_mapper
@@ -78,13 +85,13 @@ class Runner
 	    end
     end
     tables.each do |format_table|
-        schema_table = mapper.schema.tables[format_table.symbol]
+      schema_table = mapper.get_schema_for_format(format_table)
 
-        target = TargetDb.new dbconfig
-        target.suffix = @suffix
-        target.schema = @schema
-        target.open mapper, schema_table
-        target.close
+      target = TargetDb.new dbconfig
+      target.suffix = @suffix
+      target.schema = @schema
+      target.open mapper, schema_table
+      target.close
     end
   end
 
@@ -140,7 +147,7 @@ private
  		return mapper_class.new
  	end
 
-  def get_dialect(dbconfig)
+  def self.get_dialect(dbconfig)
     adapter = dbconfig['adapter']
     if adapter =~ /mysql/i
       return DialectMySql.new

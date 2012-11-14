@@ -11,6 +11,25 @@ class Target
 		return @suffix.nil? ? symbol : (symbol.to_s + @suffix).to_sym
 	end
 
+	def execute(dbconfig, sql_script)
+		open_database_connection dbconfig
+		begin
+			return ActiveRecord::Base.connection.execute sql_script
+		ensure
+			close_database_connection
+		end
+	end
+
+	def save_table(dbconfig, dialect, schema_table, filename)
+		open_database_connection dbconfig
+		begin
+			table_name = get_table_name(schema_table.symbol)
+			dialect.save_to_file(ActiveRecord::Base.connection, schema_table, table_name, filename)
+		ensure
+			close_database_connection
+		end
+	end
+
 	def open_database_connection(dbconfig)
 		ActiveRecord::Base.establish_connection(dbconfig)
 		#ActiveRecord::Base.logger = Logger.new(STDERR)
@@ -34,10 +53,10 @@ class Target
 		migrator.up
 	end
 
-	def create_activerecord_class table_name
-		full_table_name = get_table_name(table_name)
+	def create_activerecord_class(table_name)
+		table_name = get_table_name(table_name)
 		Class.new(ActiveRecord::Base) do
-			self.table_name = full_table_name
+			self.table_name = table_name
 		end  
 	end
 
