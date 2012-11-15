@@ -30,15 +30,23 @@ class Target
 		end
 	end
 
+	def drop_schema(dbconfig, dialect, schema)
+		ActiveRecord::Base.establish_connection(dbconfig)
+		begin
+			# TODO: Move to dialect, this is Postgresql specific
+			ActiveRecord::Base.connection.execute "DROP SCHEMA #{schema} CASCADE;"
+		ensure
+			ActiveRecord::Base.connection.disconnect!
+		end
+	end
+
 	def open_database_connection(dbconfig)
 		ActiveRecord::Base.establish_connection(dbconfig)
 		#ActiveRecord::Base.logger = Logger.new(STDERR)
 		unless @schema.nil?
+			# TODO: Move to dialect, this is Postgresql specific
 			unless ActiveRecord::Base.connection.schema_exists?(@schema)
 				ActiveRecord::Base.connection.execute "CREATE SCHEMA #{@schema};"
-				# CREATE SCHEMA #{@schema};
-				# SET search_path TO #{@schema};
-				# DROP SCHEMA #{@schema} CASCADE;
 			end
 			ActiveRecord::Base.connection.schema_search_path = "#{@schema},public"
 		end

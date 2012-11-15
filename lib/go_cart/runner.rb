@@ -65,6 +65,11 @@ class Runner
 	  target.save_table(dbconfig, get_dialect(dbconfig), schema_table, filename)
 	end
 
+	def self.drop_schema(dbconfig, schema)
+		target = Target.new()
+	  target.drop_schema(dbconfig, get_dialect(dbconfig), schema)
+	end
+
   def create_tables_only(dbconfig, options = {})
 	  load_options options
 
