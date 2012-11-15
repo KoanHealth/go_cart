@@ -14,7 +14,7 @@ development:
   reconnect: false
   database: gocart_development
   pool: 5
-  username: careinsight_application
+  username: gocart_user
   password:
   socket: /tmp/mysql.sock
 
@@ -27,7 +27,7 @@ test:
   reconnect: false
   database: gocart_test
   pool: 5
-  username: careinsight_application
+  username: gocart_user
   password:
   socket: /tmp/mysql.sock
 
@@ -37,7 +37,7 @@ production:
   reconnect: false
   database: gocart
   pool: 5
-  username: careinsight_application
+  username: gocart_user
   password:
   socket: /tmp/mysql.sock
 
