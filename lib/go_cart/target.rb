@@ -34,7 +34,7 @@ class Target
 		begin
 			unless @schema.nil?
 				# TODO: Move to dialect, this is Postgresql specific
-				if ActiveRecord::Base.connection.schema_exists?(@schema)
+				if ActiveRecord::Base.connection.schema_exists?(schema)
 					ActiveRecord::Base.connection.execute "DROP SCHEMA #{schema} CASCADE;"
 				end
 			end
