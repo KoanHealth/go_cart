@@ -5,7 +5,7 @@ require_relative 'gocart_def'
 module GoCart
 class GoCartRun < GoCartDef
 
-	attr_accessor :data_file, :format_file, :mapper_name, :table_names, :db_suffix, :just_create
+	attr_accessor :data_file, :format_file, :mapper_name, :schema_name, :table_names, :db_suffix, :just_create
 	attr_accessor :environment, :adapter, :database, :username, :password, :db_schema
 	attr_accessor :bulk_load, :bulk_filename, :use_import
 
@@ -14,7 +14,6 @@ class GoCartRun < GoCartDef
 		runner = Runner.new(@format_file)
 
 		options = Hash.new
-		options[:mapper_name] = @mapper_name unless @mapper_name.nil?
 		options[:table_names] = @table_names unless @table_names.nil?
 		options[:bulk_load] = @bulk_load unless @bulk_load.nil?
 		options[:bulk_filename] = @bulk_filename unless @bulk_filename.nil?
@@ -22,12 +21,11 @@ class GoCartRun < GoCartDef
 		options[:db_suffix] = @db_suffix unless @db_suffix.nil?
 		options[:db_schema] = @db_schema unless @db_schema.nil?
 
-		mapper = get_mapper
 		Runner.load_formats(@format_file)
 		if @just_create
-      runner.create_tables_only(dbconfig, mapper.schema, options)
+      runner.create_schema_tables(dbconfig, get_schema, options)
     else
-      runner.load_data_files(dbconfig, Dir.glob(@data_file), mapper, options)
+      runner.load_data_files(dbconfig, Dir.glob(@data_file), get_mapper, options)
 	  end
   end
 
@@ -49,6 +47,10 @@ class GoCartRun < GoCartDef
 
 		opts.on('--mapper MAPPERCLASS', 'mapper classname (ie. MyModule::MyMapper)') do |value|
 			@mapper_name = value
+		end
+
+		opts.on('--schema SCHEMACLASS', 'schema classname (ie. MyModule::MySchema)') do |value|
+			@schema_name = value
 		end
 
 		opts.on('--tables TABLENAME[,TABLENAME...]', 'table name') do |value|
@@ -75,7 +77,7 @@ class GoCartRun < GoCartDef
 			@password = value
 		end
 
-		opts.on('--schema SCHEMAPATH', 'PostgreSQL schema search path') do |value|
+		opts.on('--dbschema SCHEMAPATH', 'PostgreSQL schema search path') do |value|
 			@db_schema = value
 		end
 
@@ -83,7 +85,7 @@ class GoCartRun < GoCartDef
 			@bulk_filename = value
 		end
 
-		opts.on('--suffix SUFFIX', 'suffix table name to make it unique') do |value|
+		opts.on('--dbsuffix SUFFIX', 'suffix table name to make it unique') do |value|
 			@db_suffix = value
 		end
 
@@ -109,14 +111,18 @@ class GoCartRun < GoCartDef
 
 private
 
+	def get_schema
+		unless @schema_name.nil?
+			schema = get_instance(@schema_name)
+			raise "Must specify mapper class (ie. MyModule::MySchema)" if schema.nil?
+			return schema
+		end
+		return get_mapper.schema
+	end
+
 	def get_mapper
 		unless @mapper_name.nil?
-			parts = @mapper_name.split('::')
-			if parts.length == 1
-				mapper = Kernel.const_get(parts[0]).new
-			else
-				mapper = Kernel.const_get(parts[0]).const_get(parts[1]).new
-			end
+			mapper = get_instance(@mapper_name)
 			raise "Must specify mapper class (ie. MyModule::MyMapper)" if mapper.nil?
 			return mapper
 		end
@@ -124,6 +130,12 @@ private
 		mapper_class = Mapper.get_last_mapper_class
 		raise "Must specify mapper class (ie. MyModule::MyMapper)" if mapper_class.nil?
 		return mapper_class.new
+	end
+
+	def get_instance(class_name)
+		parts = class_name.split('::')
+		return Kernel.const_get(parts[0]).new if parts.length == 1
+		return Kernel.const_get(parts[0]).const_get(parts[1]).new
 	end
 
   def get_dbconfig

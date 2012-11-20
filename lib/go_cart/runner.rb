@@ -5,7 +5,7 @@ require 'go_cart/dialect_postgresql'
 module GoCart
 class Runner
 
-	attr_accessor :mapper_name, :table_names, :db_suffix, :db_schema
+	attr_accessor :table_names, :db_suffix, :db_schema
 	attr_accessor :bulk_load, :bulk_filename, :use_import
 
 	def self.load_formats(formats)
@@ -18,6 +18,29 @@ class Runner
 			raise "Format files not found: #{format}" unless file_count > 0
 		end
 	end
+
+	def create_schema_tables(dbconfig, schema, options = {})
+  load_options options
+
+   tables = []
+   if @table_names.nil?
+     tables.concat schema.tables.map { |symbol, table| table }
+   else
+     @table_names.each do |table_name|
+	     schema_table = schema.get_table(table_name.to_sym)
+	     raise "Unrecognized table #{table_name}" if schema_table.nil?
+	     tables << schema_table
+     end
+   end
+
+   tables.each do |schema_table|
+     target = TargetDb.new dbconfig
+     target.suffix = @db_suffix
+     target.schema = @db_schema
+     target.open schema, schema_table
+     target.close
+   end
+ end
 
 	def load_data_files(dbconfig, data_files, mapper = nil, options = {})
 	  load_options options
@@ -59,30 +82,7 @@ class Runner
 		raise "File not found: #{data_files}" if file_count <= 0
 	end
 
-  def create_tables_only(dbconfig, schema, options = {})
-	  load_options options
-
-    tables = []
-    if @table_names.nil?
-      tables.concat schema.tables.map { |symbol, table| table }
-    else
-	    @table_names.each do |table_name|
-		    schema_table = schema.get_table(table_name.to_sym)
-		    raise "Unrecognized table #{table_name}" if schema_table.nil?
-		    tables << schema_table
-	    end
-    end
-
-    tables.each do |schema_table|
-      target = TargetDb.new dbconfig
-      target.suffix = @db_suffix
-      target.schema = @db_schema
-      target.open schema, schema_table
-      target.close
-    end
-  end
-
-	def self.save_data(dbconfig, schema_table, filename, options = {})
+	def self.save_data_file(dbconfig, schema_table, filename, options = {})
 		target = Target.new()
 	  target.suffix = options[:db_suffix]
 	  target.schema = options[:db_schema]
@@ -134,7 +134,6 @@ private
 	end
 
 	def load_options(options)
-		@mapper_name = options[:mapper_name]
 		@table_names = options[:table_names]
 		@db_suffix = options[:db_suffix]
 		@db_schema = options[:db_schema]
