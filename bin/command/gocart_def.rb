@@ -1,7 +1,6 @@
 require 'rubygems'
 require 'optparse'
 require 'colorize'
-require 'go_cart'
 
 module GoCart
 class GoCartDef

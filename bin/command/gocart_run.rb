@@ -11,7 +11,7 @@ class GoCartRun < GoCartDef
 
 	def execute()
 		dbconfig = get_dbconfig
-		runner = Runner.new(@format_file)
+		Runner.load_formats(@format_file)
 
 		options = Hash.new
 		options[:table_names] = @table_names unless @table_names.nil?
@@ -21,7 +21,7 @@ class GoCartRun < GoCartDef
 		options[:db_suffix] = @db_suffix unless @db_suffix.nil?
 		options[:db_schema] = @db_schema unless @db_schema.nil?
 
-		Runner.load_formats(@format_file)
+		runner = Runner.new()
 		if @just_create
       runner.create_schema_tables(dbconfig, get_schema, options)
     else
@@ -37,8 +37,8 @@ class GoCartRun < GoCartDef
 		opts.separator 'OPTIONS:'
 
 		# Add arguments
-		opts.on('--format FORMATFILE', 'format filename') do |value|
-			@format_file = value
+		opts.on('--format FORMATFILE[,...]', 'format filenames') do |value|
+			@format_file = split_args(value)
 		end
 
 		opts.on('--data DATAFILE', 'data filename to load') do |value|
@@ -53,8 +53,8 @@ class GoCartRun < GoCartDef
 			@schema_name = value
 		end
 
-		opts.on('--tables TABLENAME[,TABLENAME...]', 'table name') do |value|
-			@table_names = value.gsub(/^[\"\']/,'').gsub(/[\"\']$/,'').split(/\s*,\s*/)
+		opts.on('--tables TABLENAME[,...]', 'table names') do |value|
+			@table_names = split_args(value)
 		end
 
 		opts.on('--env ENVIRONMENT', 'configuration environment') do |value|
@@ -117,7 +117,9 @@ private
 			raise "Must specify mapper class (ie. MyModule::MySchema)" if schema.nil?
 			return schema
 		end
-		return get_mapper.schema
+
+		mapper = get_mapper
+		return mapper.nil? ? nil : mapper.schema
 	end
 
 	def get_mapper
@@ -126,10 +128,7 @@ private
 			raise "Must specify mapper class (ie. MyModule::MyMapper)" if mapper.nil?
 			return mapper
 		end
-
-		mapper_class = Mapper.get_last_mapper_class
-		raise "Must specify mapper class (ie. MyModule::MyMapper)" if mapper_class.nil?
-		return mapper_class.new
+		return nil
 	end
 
 	def get_instance(class_name)
@@ -146,6 +145,10 @@ private
 		dbconfig['username'] = @username unless @username.nil?
 		dbconfig['password'] = @password unless @password.nil?
 		return dbconfig
+	end
+
+	def split_args(value)
+		return value.gsub(/^[\"\']/,'').gsub(/[\"\']$/,'').split(/\s*,\s*/)
 	end
 
 end

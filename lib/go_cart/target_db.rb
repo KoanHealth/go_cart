@@ -18,7 +18,7 @@ class TargetDb < Target
 		open_database_connection @dbconfig
 		@table_class = create_activerecord_class schema_table.symbol
 		unless ActiveRecord::Base.connection.table_exists? @table_class.table_name
-			create_tables mapper
+			create_tables schema
 		end
 		@columns = schema_table.get_columns()
 	end

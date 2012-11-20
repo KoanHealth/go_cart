@@ -4,7 +4,7 @@ module GoCart
 class LoaderFromCsv < Loader
 
 	def load(file, mapper, format_table, schema_table, target)
-		target.open mapper, schema_table
+		target.open mapper.schema, schema_table
 		begin
 			filter = format_table.filter
 			mapping = mapper.get_mapping schema_table.symbol

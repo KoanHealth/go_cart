@@ -22,5 +22,4 @@ Gem::Specification.new do |gem|
 	gem.add_dependency "activerecord-import"
 
 	gem.add_development_dependency "rspec"
-
 end

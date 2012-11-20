@@ -19,28 +19,28 @@ class Runner
 		end
 	end
 
-	def create_schema_tables(dbconfig, schema, options = {})
-  load_options options
+	def create_schema_tables(dbconfig, schema = nil, options = {})
+    load_options options
 
-   tables = []
-   if @table_names.nil?
-     tables.concat schema.tables.map { |symbol, table| table }
-   else
-     @table_names.each do |table_name|
-	     schema_table = schema.get_table(table_name.to_sym)
-	     raise "Unrecognized table #{table_name}" if schema_table.nil?
-	     tables << schema_table
-     end
-   end
+    tables = []
+    if @table_names.nil?
+      tables.concat schema.tables.map { |symbol, table| table }
+    else
+      @table_names.each do |table_name|
+	      schema_table = schema.get_table(table_name.to_sym)
+	      raise "Unrecognized table #{table_name}" if schema_table.nil?
+	      tables << schema_table
+      end
+    end
 
-   tables.each do |schema_table|
-     target = TargetDb.new dbconfig
-     target.suffix = @db_suffix
-     target.schema = @db_schema
-     target.open schema, schema_table
-     target.close
-   end
- end
+    tables.each do |schema_table|
+      target = TargetDb.new dbconfig
+      target.suffix = @db_suffix
+      target.schema = @db_schema
+      target.open schema, schema_table
+      target.close
+    end
+  end
 
 	def load_data_files(dbconfig, data_files, mapper = nil, options = {})
 	  load_options options
