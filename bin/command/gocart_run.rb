@@ -114,7 +114,7 @@ private
 	def get_schema
 		unless @schema_name.nil?
 			schema = get_instance(@schema_name)
-			raise "Must specify mapper class (ie. MyModule::MySchema)" if schema.nil?
+			raise "Invalid schema name: #{@schema_name}" if mapper.nil?
 			return schema
 		end
 
@@ -125,7 +125,7 @@ private
 	def get_mapper
 		unless @mapper_name.nil?
 			mapper = get_instance(@mapper_name)
-			raise "Must specify mapper class (ie. MyModule::MyMapper)" if mapper.nil?
+			raise "Invalid mapper name: #{@mapper_name}" if mapper.nil?
 			return mapper
 		end
 		return nil
