@@ -29,14 +29,12 @@ class Target
 		end
 	end
 
-	def drop_schema(dbconfig, dialect, schema)
+	def drop_db_schema(dbconfig, dialect, schema_name)
 		ActiveRecord::Base.establish_connection(dbconfig)
 		begin
-			unless @schema.nil?
-				# TODO: Move to dialect, this is Postgresql specific
-				if ActiveRecord::Base.connection.schema_exists?(schema)
-					ActiveRecord::Base.connection.execute "DROP SCHEMA #{schema} CASCADE;"
-				end
+			# TODO: Move to dialect, this is Postgresql specific
+			if ActiveRecord::Base.connection.schema_exists?(schema_name)
+				ActiveRecord::Base.connection.execute "DROP SCHEMA #{schema_name} CASCADE;"
 			end
 		ensure
 			ActiveRecord::Base.connection.disconnect!
@@ -58,8 +56,8 @@ class Target
 		ActiveRecord::Base.connection.create_database(dbconfig['database'])
 	end
 
-	def create_tables(mapper)
-		migrator = SchemaMigrator.new mapper.schema, @suffix
+	def create_tables(schema)
+		migrator = SchemaMigrator.new schema, @suffix
 		migrator.up
 	end
 
@@ -70,8 +68,8 @@ class Target
 		end  
 	end
 
-	def drop_tables(mapper)
-		migrator = SchemaMigrator.new mapper.schema, @suffix
+	def drop_tables(schema)
+		migrator = SchemaMigrator.new schema, @suffix
 		migrator.down
 	end
 

@@ -14,7 +14,7 @@ class TargetDb < Target
 		@columns = nil
 	end
 
-	def open(mapper, schema_table)
+	def open(schema, schema_table)
 		open_database_connection @dbconfig
 		@table_class = create_activerecord_class schema_table.symbol
 		unless ActiveRecord::Base.connection.table_exists? @table_class.table_name

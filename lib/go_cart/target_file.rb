@@ -14,7 +14,7 @@ class TargetFile < Target
 		@writer = nil
 	end
 
-	def open(mapper, schema_table)
+	def open(schema, schema_table)
 		@writer = CSV.open(@filename, 'w', { :col_sep => "\t" })
 		@writer << schema_table.get_columns()
 	end
@@ -32,12 +32,12 @@ class TargetFile < Target
 		end
 	end
 
-	def import(dbconfig, mapper, schema_table)
+	def import(dbconfig, schema, schema_table)
 		open_database_connection dbconfig
 		begin
 			table_name = get_table_name(schema_table.symbol)
 			unless ActiveRecord::Base.connection.table_exists? table_name
-				create_tables mapper
+				create_tables schema
 			end
 			@dialect.load_from_file(ActiveRecord::Base.connection, schema_table, table_name, @filename)
 		ensure

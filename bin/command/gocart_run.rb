@@ -5,8 +5,8 @@ require_relative 'gocart_def'
 module GoCart
 class GoCartRun < GoCartDef
 
-	attr_accessor :data_file, :format_file, :mapper_name, :table_names, :suffix, :just_create
-	attr_accessor :environment, :adapter, :database, :username, :password, :schema
+	attr_accessor :data_file, :format_file, :mapper_name, :table_names, :db_suffix, :just_create
+	attr_accessor :environment, :adapter, :database, :username, :password, :db_schema
 	attr_accessor :bulk_load, :bulk_filename, :use_import
 
 	def execute()
@@ -19,13 +19,15 @@ class GoCartRun < GoCartDef
 		options[:bulk_load] = @bulk_load unless @bulk_load.nil?
 		options[:bulk_filename] = @bulk_filename unless @bulk_filename.nil?
 		options[:use_import] = @use_import unless @use_import.nil?
-		options[:suffix] = @suffix unless @suffix.nil?
-		options[:schema] = @schema unless @schema.nil?
+		options[:db_suffix] = @db_suffix unless @db_suffix.nil?
+		options[:db_schema] = @db_schema unless @db_schema.nil?
 
+		mapper = get_mapper
+		Runner.load_formats(@format_file)
 		if @just_create
-      runner.create_tables_only(dbconfig, options)
+      runner.create_tables_only(dbconfig, mapper.schema, options)
     else
-      runner.load_data(dbconfig, Dir.glob(@data_file), options)
+      runner.load_data_files(dbconfig, Dir.glob(@data_file), mapper, options)
 	  end
   end
 
@@ -45,7 +47,7 @@ class GoCartRun < GoCartDef
 			@data_file = value
 		end
 
-		opts.on('--mapper MAPPERCLASS', 'mapper classname') do |value|
+		opts.on('--mapper MAPPERCLASS', 'mapper classname (ie. MyModule::MyMapper)') do |value|
 			@mapper_name = value
 		end
 
@@ -74,7 +76,7 @@ class GoCartRun < GoCartDef
 		end
 
 		opts.on('--schema SCHEMAPATH', 'PostgreSQL schema search path') do |value|
-			@schema = value
+			@db_schema = value
 		end
 
 		opts.on('--file FILENAME', 'bulk-load filename (output)') do |value|
@@ -82,7 +84,7 @@ class GoCartRun < GoCartDef
 		end
 
 		opts.on('--suffix SUFFIX', 'suffix table name to make it unique') do |value|
-			@suffix = value
+			@db_suffix = value
 		end
 
 		opts.on('--load', 'perform bulk-load') do |value|
@@ -106,6 +108,23 @@ class GoCartRun < GoCartDef
 	end
 
 private
+
+	def get_mapper
+		unless @mapper_name.nil?
+			parts = @mapper_name.split('::')
+			if parts.length == 1
+				mapper = Kernel.const_get(parts[0]).new
+			else
+				mapper = Kernel.const_get(parts[0]).const_get(parts[1]).new
+			end
+			raise "Must specify mapper class (ie. MyModule::MyMapper)" if mapper.nil?
+			return mapper
+		end
+
+		mapper_class = Mapper.get_last_mapper_class
+		raise "Must specify mapper class (ie. MyModule::MyMapper)" if mapper_class.nil?
+		return mapper_class.new
+	end
 
   def get_dbconfig
 		@environment = @environment || 'development'
