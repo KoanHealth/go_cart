@@ -8,7 +8,7 @@ Gem::Specification.new do |gem|
   gem.version = GoCart::VERSION
 	gem.authors = ["Brad Smalling"]
 	gem.email = ["brad smalling @ koanhealth com"]
-	gem.homepage = 'https://github.com/KoanHealth/gocart'
+	gem.homepage = 'https://github.com/KoanHealth/go_cart'
 	gem.summary = 'Load flat-files into database tables.'
 	gem.description = 'GoCart is a ruby library for flat-file field loading.'
 
