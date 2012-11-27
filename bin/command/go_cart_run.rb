@@ -1,6 +1,6 @@
 require 'rubygems'
 require 'yaml'
-require_relative 'gocart_def'
+require_relative 'go_cart_def'
 
 module GoCart
 class GoCartRun < GoCartDef
