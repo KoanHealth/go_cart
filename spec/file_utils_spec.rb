@@ -1,21 +1,13 @@
 require 'spec_helper'
 require 'date'
 
-describe "Detect Files" do
+describe "Inspect CSV files" do
 
-	def path
-		return File.dirname(File.expand_path(__FILE__))
-	end
-
-  def data(filename)
-	  return File.join(path, "data", filename)
+  def data_file(filename)
+	  return File.join(File.dirname(File.expand_path(__FILE__)), "data", filename)
   end
 
-  def files()
-	  return Dir[data("sample??_*.txt")].sort
-  end
-
-	def check_has_headers?(hash)
+	def check_csv_options(hash)
 		hash.each do |filename, options|
 			begin
 		    calculated_options = GoCart::FileUtils.get_csv_options(filename)
@@ -28,24 +20,28 @@ describe "Detect Files" do
 		end
 	end
 
-  it "should detect headers" do
-	  sample = files
-	  check_has_headers?(
+	before(:all) do
+		@samples = Dir[data_file("sample??_*.txt")].sort
+	end
+
+  it "should detect CSV options" do
+	  sample = @files
+	  check_csv_options(
 		  {
-			  sample[0] => :exception,
-			  sample[1] => { headers: true, col_sep: ',' },
-			  sample[2] => { headers: true, col_sep: ',' },
-			  sample[3] => { headers: false, col_sep: ',' },
-			  sample[4] => { headers: false, col_sep: ',' },
-			  sample[5] => { headers: true, col_sep: ',' },
-			  sample[6] => { headers: true, col_sep: '|' },
-			  sample[7] => :exception,
+				@samples[0] => :exception,
+				@samples[1] => { headers: true, col_sep: ',' },
+			  @samples[2] => { headers: true, col_sep: ',' },
+			  @samples[3] => { headers: false, col_sep: ',' },
+			  @samples[4] => { headers: false, col_sep: ',' },
+			  @samples[5] => { headers: true, col_sep: ',' },
+			  @samples[6] => { headers: true, col_sep: '|' },
+			  @samples[7] => :exception,
 			}
 	  )
   end
 
 	it "should get headers" do
-		headers = GoCart::FileUtils.get_headers(data('sample01_lf.txt'))
+		headers = GoCart::FileUtils.get_headers(@samples[1])
 		headers.should == [ 'A', 'B', 'C', 'D' ]
 	end
 
