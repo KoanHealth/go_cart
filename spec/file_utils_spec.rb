@@ -16,13 +16,14 @@ describe "Detect Files" do
   end
 
 	def check_has_headers?(hash)
-		hash.each do |filename, has_headers|
+		hash.each do |filename, options|
 			begin
-				puts filename
-		    calculated_value = GoCart::FileUtils.has_headers?(filename)
-		    calculated_value.should == has_headers
+		    calculated_options = GoCart::FileUtils.get_csv_options(filename)
+				options.each do |key, value|
+					calculated_options[key].should == options[key]
+				end
 	    rescue
-		    raise unless has_headers == :exception
+		    raise unless options == :exception
 	    end
 		end
 	end
@@ -32,15 +33,20 @@ describe "Detect Files" do
 	  check_has_headers?(
 		  {
 			  sample[0] => :exception,
-			  sample[1] => true,
-			  sample[2] => true,
-			  sample[3] => false,
-			  sample[4] => false,
-			  sample[5] => true,
-			  sample[6] => true,
+			  sample[1] => { headers: true, col_sep: ',' },
+			  sample[2] => { headers: true, col_sep: ',' },
+			  sample[3] => { headers: false, col_sep: ',' },
+			  sample[4] => { headers: false, col_sep: ',' },
+			  sample[5] => { headers: true, col_sep: ',' },
+			  sample[6] => { headers: true, col_sep: '|' },
 			  sample[7] => :exception,
 			}
 	  )
   end
+
+	it "should get headers" do
+		headers = GoCart::FileUtils.get_headers(data('sample01_lf.txt'))
+		headers.should == [ 'A', 'B', 'C', 'D' ]
+	end
 
 end
