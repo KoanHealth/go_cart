@@ -8,6 +8,8 @@ require 'go_cart/format'
 require 'go_cart/schema'
 require 'go_cart/mapper'
 require 'go_cart/runner'
+
+require 'go_cart/schema_table_migrator'
 require 'go_cart/schema_migrator'
 
 require 'go_cart/generator'

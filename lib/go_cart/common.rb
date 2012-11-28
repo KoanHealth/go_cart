@@ -30,7 +30,7 @@ class CommonBase
 protected
 
 	def create_method(name, &block)
-	    self.class.send(:define_method, name, &block)
+		self.class.send(:define_method, name, &block)
 	end
 
 	def create_attr(name, value)

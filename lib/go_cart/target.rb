@@ -4,10 +4,10 @@ require 'activerecord-import'
 module GoCart
 class Target
 
-	attr_accessor :suffix, :schema
+	attr_accessor :db_suffix, :db_schema
 
 	def get_table_name(symbol)
-		return @suffix.nil? ? symbol : (symbol.to_s + @suffix).to_sym
+		return @db_suffix.nil? ? symbol : (symbol.to_s + @db_suffix).to_sym
 	end
 
 	def execute(dbconfig, sql_script)
@@ -43,12 +43,12 @@ class Target
 
 	def open_database_connection(dbconfig)
 		ActiveRecord::Base.establish_connection(dbconfig)
-		unless @schema.nil?
+		unless @db_schema.nil?
 			# TODO: Move to dialect, this is Postgresql specific
-			unless ActiveRecord::Base.connection.schema_exists?(@schema)
-				ActiveRecord::Base.connection.execute "CREATE SCHEMA #{@schema};"
+			unless ActiveRecord::Base.connection.schema_exists?(@db_schema)
+				ActiveRecord::Base.connection.execute "CREATE SCHEMA #{@db_schema};"
 			end
-			ActiveRecord::Base.connection.schema_search_path = "#{@schema},public"
+			ActiveRecord::Base.connection.schema_search_path = "#{@db_schema},public"
 		end
 	end
 
@@ -56,9 +56,12 @@ class Target
 		ActiveRecord::Base.connection.create_database(dbconfig['database'])
 	end
 
+	def create_table(schema_table)
+		SchemaTableMigrator.new(schema_table, @db_suffix).up
+	end
+
 	def create_tables(schema)
-		migrator = SchemaMigrator.new schema, @suffix
-		migrator.up
+		SchemaMigrator.new(schema, @db_suffix).up
 	end
 
 	def create_activerecord_class(table_name)
@@ -68,9 +71,12 @@ class Target
 		end  
 	end
 
+	def drop_table(schema_table)
+		SchemaTableMigrator.new(schema_table, @db_suffix).down
+	end
+
 	def drop_tables(schema)
-		migrator = SchemaMigrator.new schema, @suffix
-		migrator.down
+		SchemaMigrator.new(schema, @db_suffix).down
 	end
 
 	def drop_database(dbconfig, ignore_error = true)

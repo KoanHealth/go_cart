@@ -14,11 +14,11 @@ class TargetDb < Target
 		@columns = nil
 	end
 
-	def open(schema, schema_table)
+	def open(schema_table)
 		open_database_connection @dbconfig
 		@table_class = create_activerecord_class schema_table.symbol
 		unless ActiveRecord::Base.connection.table_exists? @table_class.table_name
-			create_tables schema
+			create_table schema_table
 		end
 		@columns = schema_table.get_columns()
 	end

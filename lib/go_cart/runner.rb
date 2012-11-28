@@ -35,12 +35,24 @@ class Runner
 
     tables.each do |schema_table|
       target = TargetDb.new dbconfig
-      target.suffix = @db_suffix
-      target.schema = @db_schema
-      target.open schema, schema_table
+      target.db_suffix = @db_suffix
+      target.db_schema = @db_schema
+      target.open schema_table
       target.close
     end
   end
+
+	def load_data_table(dbconfig, schema_table, filename, options = {})
+		load_options options
+
+	  target = TargetFile.new self.class.get_dialect(dbconfig), filename
+		target.db_suffix = @db_suffix
+		target.db_schema = @db_schema
+
+		target.open schema_table
+		target.import(dbconfig, schema_table)
+		target.close
+	end
 
 	def load_data_files(dbconfig, data_files, mapper = nil, options = {})
 	  load_options options
@@ -68,11 +80,11 @@ class Runner
         else
           target = TargetDb.new dbconfig
         end
-        target.suffix = @db_suffix
-        target.schema = @db_schema
+        target.db_suffix = @db_suffix
+        target.db_schema = @db_schema
 
         loader.load(file, file_mapper, format_table, schema_table, target)
-        target.import(dbconfig, file_mapper.schema, schema_table) if @bulk_load
+        target.import(dbconfig, schema_table) if @bulk_load
       ensure
   			target.delete if bulk_delete unless target.nil?
       end
@@ -84,8 +96,8 @@ class Runner
 
 	def self.save_data_file(dbconfig, schema_table, filename, options = {})
 		target = Target.new()
-	  target.suffix = options[:db_suffix]
-	  target.schema = options[:db_schema]
+	  target.db_suffix = options[:db_suffix]
+	  target.db_schema = options[:db_schema]
 	  target.save_table(dbconfig, get_dialect(dbconfig), schema_table, filename)
 	end
 
