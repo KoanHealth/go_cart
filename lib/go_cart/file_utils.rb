@@ -9,20 +9,14 @@ class FileUtils
   MAX_LINE_LENGTH = 50000
 
   def self.has_headers?(input_file)
-		eol_char = get_eol_char(input_file)
-		File.open(input_file, 'r').each(eol_char) do |line|
- 			next if line =~ /^\s*$/
- 			line.chomp!
-
- 			return is_header_row? line
- 		end
- 		return false
+		return get_csv_options(input_file)[:headers]
  	end
 
 	def self.get_headers(input_file)
 		headers = []
 		options = get_csv_options(input_file)
 		return headers unless options[:headers]
+
 		CSV.foreach(input_file, options) do |row|
 			if row.header_row?
 				row.each do |symbol, value|
@@ -64,7 +58,7 @@ class FileUtils
 				options[:headers] = false
 			end
 		else
-			raise 'Data file is fixed length (not a CSV file)'
+			raise 'Data file is not a CSV file'
 		end
 		return options
 	end
