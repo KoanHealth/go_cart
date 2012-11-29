@@ -30,7 +30,6 @@ private
 		formats.each do |symbol, format|
 			@class_name = TypeUtils.to_class_name(format.name) if set_class_name
 			emit_format output, format, schemas[symbol]
-			has_header = true
 		end
 		emit_file_footer output
 	end

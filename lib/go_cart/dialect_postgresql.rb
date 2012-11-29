@@ -12,7 +12,8 @@ class DialectPostgresql
 
 	def load_from_file(connection, schema_table, table_name, filename)
 		raw_connection = connection.raw_connection
-		raw_connection.exec generate_load_command(schema_table, table_name)
+		sql_cmd = generate_load_command(schema_table, table_name)
+		raw_connection.exec sql_cmd
 
 		File.readlines(filename).each do |line|
 			raw_connection.put_copy_data line
@@ -25,7 +26,8 @@ class DialectPostgresql
 
 	def save_to_file(connection, schema_table, table_name, filename)
 		raw_connection = connection.raw_connection
-		result = raw_connection.exec generate_save_command(schema_table, table_name)
+		sql_cmd = generate_save_command(schema_table, table_name)
+		result = raw_connection.exec sql_cmd
 
 		File.open(filename, 'w') do |file|
 			while (row = raw_connection.get_copy_data())
@@ -40,23 +42,27 @@ private
 
 	def generate_load_command(schema_table, table_name)
 		columns = schema_table.get_columns()
+		e_field = 'E' if @field_separator.ord < 32
+		delimiter = @field_separator.inspect[1..-2]
 
 		return <<-END_OF_QUERY
 			COPY #{table_name} (
 			#{columns.map { |symbol| "\"#{symbol}\"" }.join(',')}
 			) FROM STDIN
-			WITH DELIMITER E'#{@field_separator}' CSV HEADER
+			WITH DELIMITER #{e_field}'#{delimiter}' CSV HEADER
 		END_OF_QUERY
 	end
 
 	def generate_save_command(schema_table, table_name)
 		columns = schema_table.get_columns()
+		e_field = 'E' if @field_separator.ord < 32
+		delimiter = @field_separator.inspect[1..-2]
 
 		return <<-END_OF_QUERY
 			COPY #{table_name} (
 			#{columns.map { |symbol| "\"#{symbol}\"" }.join(',')}
 			) TO STDOUT
-			WITH DELIMITER E'#{@field_separator}' CSV HEADER
+			WITH DELIMITER #{e_field}'#{delimiter}' CSV HEADER
 		END_OF_QUERY
 	end
 

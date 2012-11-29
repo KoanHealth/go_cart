@@ -4,7 +4,6 @@ module GoCart
 class FileUtils
 
 	MAX_SAMPLES = 100
-	MIN_SEPARATORS = 2
   CHAR_BUFFER_SIZE = 500
   MAX_LINE_LENGTH = 50000
 
@@ -48,7 +47,7 @@ class FileUtils
 		separator_info = separators.max_by { |k,v| v }
 
 		options = Hash.new
-		if !separator_info.nil? && separator_info[1] >= MIN_SEPARATORS * samples
+		if !separator_info.nil? && separator_info[1] >= samples
 			options[:col_sep] = separator_info[0]
 			if has_header
 				options[:headers] = true

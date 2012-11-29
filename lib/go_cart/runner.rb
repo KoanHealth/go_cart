@@ -49,9 +49,7 @@ class Runner
 		target.db_suffix = @db_suffix
 		target.db_schema = @db_schema
 
-		target.open schema_table
 		target.import(dbconfig, schema_table)
-		target.close
 	end
 
 	def load_data_files(dbconfig, data_files, mapper = nil, options = {})
@@ -158,10 +156,10 @@ private
   def self.get_dialect(dbconfig, filename = nil)
 	  field_separator = "\t"
 	  unless filename.nil?
-		  extension = File.extname(filename)
-		  field_separator = ',' if extension == '.csv'
-		  field_separator = '|' if extension == '.bsv'
+		  options = FileUtils.get_csv_options(filename)
+		  field_separator = options[:col_sep]
 	  end
+
     adapter = dbconfig['adapter']
     if adapter =~ /mysql/i
       return DialectMySql.new(field_separator)

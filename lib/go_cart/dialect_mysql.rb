@@ -22,11 +22,12 @@ private
 
 	def generate_load_command(schema_table, table_name, filename)
 		columns = schema_table.get_columns()
+		delimiter = @field_separator.inspect[1..-2]
 
 		return <<-END_OF_QUERY
 			LOAD DATA INFILE '#{filename}'
 			INTO TABLE #{table_name}
-			FIELDS TERMINATED BY '#{@field_separator}'
+			FIELDS TERMINATED BY '#{delimiter}'
 			IGNORE 1 LINES (
 			#{columns.map { |symbol| "`#{symbol}`" }.join(',')}
 			)
@@ -35,11 +36,12 @@ private
 
 	def generate_save_command(schema_table, table_name, filename)
 		columns = schema_table.get_columns()
+		delimiter = @field_separator.inspect[1..-2]
 
 		return <<-END_OF_QUERY
 			SELECT #{columns.map { |symbol| "`#{symbol}`" }.join(',')}
 			INTO OUTFILE '#{filename}'
-			FIELDS TERMINATED BY '#{@field_separator}'
+			FIELDS TERMINATED BY '#{delimiter}'
 			FROM #{table_name}
 		END_OF_QUERY
 	end
