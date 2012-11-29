@@ -1,6 +1,10 @@
 module GoCart
 class DialectPostgresql
 
+	def initialize(field_separator = "\t")
+		@field_separator = field_separator
+	end
+
 	def prepare_row(row)
       # In PostgreSQL CSV empty is NULL
       return row
@@ -35,26 +39,24 @@ class DialectPostgresql
 private
 
 	def generate_load_command(schema_table, table_name)
-		field_separator = "\\t"
 		columns = schema_table.get_columns()
 
 		return <<-END_OF_QUERY
 			COPY #{table_name} (
 			#{columns.map { |symbol| "\"#{symbol}\"" }.join(',')}
 			) FROM STDIN
-			WITH DELIMITER E'#{field_separator}' CSV HEADER
+			WITH DELIMITER E'#{@field_separator}' CSV HEADER
 		END_OF_QUERY
 	end
 
 	def generate_save_command(schema_table, table_name)
-		field_separator = "\\t"
 		columns = schema_table.get_columns()
 
 		return <<-END_OF_QUERY
 			COPY #{table_name} (
 			#{columns.map { |symbol| "\"#{symbol}\"" }.join(',')}
 			) TO STDOUT
-			WITH DELIMITER E'#{field_separator}' CSV HEADER
+			WITH DELIMITER E'#{@field_separator}' CSV HEADER
 		END_OF_QUERY
 	end
 

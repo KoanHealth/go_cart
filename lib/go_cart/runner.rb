@@ -45,7 +45,7 @@ class Runner
 	def load_data_table(dbconfig, schema_table, filename, options = {})
 		load_options options
 
-	  target = TargetFile.new self.class.get_dialect(dbconfig), filename
+	  target = TargetFile.new self.class.get_dialect(dbconfig, filename), filename
 		target.db_suffix = @db_suffix
 		target.db_schema = @db_schema
 
@@ -155,12 +155,18 @@ private
 		@use_import = options[:use_import]
 	end
 
-  def self.get_dialect(dbconfig)
+  def self.get_dialect(dbconfig, filename = nil)
+	  field_separator = "\t"
+	  unless filename.nil?
+		  extension = File.extname(filename)
+		  field_separator = ',' if extension == '.csv'
+		  field_separator = '|' if extension == '.bsv'
+	  end
     adapter = dbconfig['adapter']
     if adapter =~ /mysql/i
-      return DialectMySql.new
+      return DialectMySql.new(field_separator)
     elsif adapter =~ /postgresql/i
-      return DialectPostgresql.new
+      return DialectPostgresql.new(field_separator)
     else
       raise "Adapter '#{adapter}' is not currently supported"
     end

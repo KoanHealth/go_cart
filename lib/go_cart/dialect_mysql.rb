@@ -1,6 +1,10 @@
 module GoCart
 class DialectMySql
 
+	def initialize(field_separator = "\t")
+		@field_separator = field_separator
+	end
+
 	def prepare_row(row)
       # MySql requires \N to differentiate NULL from empty
       return row.map { |field| field.nil? ? "\\N" : field }
@@ -17,13 +21,12 @@ class DialectMySql
 private
 
 	def generate_load_command(schema_table, table_name, filename)
-		field_separator = "\\t"
 		columns = schema_table.get_columns()
 
 		return <<-END_OF_QUERY
 			LOAD DATA INFILE '#{filename}'
 			INTO TABLE #{table_name}
-			FIELDS TERMINATED BY '#{field_separator}'
+			FIELDS TERMINATED BY '#{@field_separator}'
 			IGNORE 1 LINES (
 			#{columns.map { |symbol| "`#{symbol}`" }.join(',')}
 			)
@@ -31,13 +34,12 @@ private
 	end
 
 	def generate_save_command(schema_table, table_name, filename)
-		field_separator = "\\t"
 		columns = schema_table.get_columns()
 
 		return <<-END_OF_QUERY
 			SELECT #{columns.map { |symbol| "`#{symbol}`" }.join(',')}
 			INTO OUTFILE '#{filename}'
-			FIELDS TERMINATED BY '#{field_separator}'
+			FIELDS TERMINATED BY '#{@field_separator}'
 			FROM #{table_name}
 		END_OF_QUERY
 	end
