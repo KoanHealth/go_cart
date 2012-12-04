@@ -23,6 +23,8 @@ class GoCartRun < GoCartDef
 
 		runner = Runner.new()
 		if @just_create
+			schema = get_schema
+			raise "Must specify fully qualified schema or mapper class name" if schema.nil?
       runner.create_schema_tables(dbconfig, get_schema, options)
     else
       runner.load_data_files(dbconfig, Dir.glob(@data_file), get_mapper, options)
@@ -107,7 +109,6 @@ class GoCartRun < GoCartDef
 		abort_err('An input file is required.', opts) if @data_file.nil? && !@just_create
 		abort_err('A format file is required.', opts) if @format_file.nil?
 		abort_err('Flag --load conflicts with --import.', opts) if @bulk_load && @use_import
-		abort_err('Please specify fully qualified schema or mapper class name') if @just_create && @schema_name.nil? && @mapper_name.nil?
 	end
 
 private
@@ -128,6 +129,11 @@ private
 			mapper = get_instance(@mapper_name)
 			raise "Invalid mapper name: #{@mapper_name}" if mapper.nil?
 			return mapper
+		end
+
+		if @just_create && Mapper.get_all_mapper_classes.size == 1
+			mapper_class = Mapper.get_last_mapper_class
+			return mapper_class.new unless mapper_class.nil?
 		end
 		return nil
 	end

@@ -18,6 +18,7 @@ Gem::Specification.new do |gem|
 	gem.require_paths = ["lib"]
 
 	gem.add_dependency "rake"
+	gem.add_dependency "colorize"
 	gem.add_dependency "activerecord"
 	gem.add_dependency "activerecord-import"
 
