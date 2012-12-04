@@ -138,12 +138,6 @@ private
 		return nil
 	end
 
-	def get_instance(class_name)
-		parts = class_name.split('::')
-		return Kernel.const_get(parts[0]).new if parts.length == 1
-		return Kernel.const_get(parts[0]).const_get(parts[1]).new
-	end
-
   def get_dbconfig
 		@environment = @environment || 'development'
 		dbconfig = YAML::load(File.open(File.join(@script_dir,'../../config','database.yml')))[@environment]

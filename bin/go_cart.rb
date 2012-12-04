@@ -14,8 +14,10 @@ class Main
 		case ARGV[0]
 		when /^g(en)?(erate)?$/i
 			cmd = GoCart::GoCartGen.new
-		when /^r(un)?$/i
-			cmd = GoCart::GoCartRun.new
+			when /^r(un)?$/i
+				cmd = GoCart::GoCartRun.new
+			when /^s(ql)?$/i
+				cmd = GoCart::GoCartSql.new
 		when nil
 			parse_err_options 'Command is required.', opts
 		else

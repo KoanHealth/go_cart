@@ -1,0 +1,9 @@
+INSERT INTO <%= to_table.symbol %> (
+<% to_table.fields.each do |symbol, field| %>    <%= symbol %>,
+<% end %>)
+SELECT
+<% to_table.fields.each do |symbol, field| %>    null,      -- <%= symbol %>
+<% end %>/* From table fields:
+<% from_table.fields.each do |symbol, field| %>    src.<%= symbol %>,
+<% end %>*/)
+FROM <%= from_table.symbol %> src
