@@ -107,6 +107,7 @@ class GoCartRun < GoCartDef
 		abort_err('An input file is required.', opts) if @data_file.nil? && !@just_create
 		abort_err('A format file is required.', opts) if @format_file.nil?
 		abort_err('Flag --load conflicts with --import.', opts) if @bulk_load && @use_import
+		abort_err('Please specify fully qualified schema or mapper class name') if @just_create && @schema_name.nil? && @mapper_name.nil?
 	end
 
 private

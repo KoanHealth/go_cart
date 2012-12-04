@@ -19,7 +19,7 @@ class Runner
 		end
 	end
 
-	def create_schema_tables(dbconfig, schema = nil, options = {})
+	def create_schema_tables(dbconfig, schema, options = {})
     load_options options
 
     tables = []
