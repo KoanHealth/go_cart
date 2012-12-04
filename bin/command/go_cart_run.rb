@@ -114,7 +114,7 @@ private
 	def get_schema
 		unless @schema_name.nil?
 			schema = get_instance(@schema_name)
-			raise "Invalid schema name: #{@schema_name}" if mapper.nil?
+			raise "Invalid schema name: #{@schema_name}" if schema.nil?
 			return schema
 		end
 
