@@ -5,7 +5,7 @@ INSERT INTO <%= to_table.symbol %> (
 <% to_table.fields.each do |symbol, field| %>    <%= symbol %>,
 <% end %>)
 SELECT
-<% mapping.each do |to_field, from_field| %>    <%= from_field.nil? ? 'null' : "src.#{from_field}" %>,      -- <%= to_field %>
+<% mapping.each do |to_field, from_field| %>    <%= from_field.nil? ? 'null' : "src.#{from_field}" %> as <%= to_field %>,
 <% end %>/* From table fields:
 <% from_table.fields.each do |symbol, field| %>    src.<%= symbol %>,
 <% end %>*/)
