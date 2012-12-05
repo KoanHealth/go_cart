@@ -141,6 +141,7 @@ class GoCartSql < GoCartDef
 	    'alt' => 'alternate',
 	    'amt' => 'amount',
 	    'beg' => 'begin',
+	    'birthdate' => ['date', 'of', 'birth'],
 	    'cd' => 'code',
 	    'desc' => 'description',
 	    'descr' => 'description',
@@ -201,7 +202,8 @@ class GoCartSql < GoCartDef
 	    'un' => 'units',
 	    'val' => 'value',
 	    'ver' => 'version',
-	    'zip' => ['zip', 'code']
+			'zip' => ['zip', 'code'],
+			'zipcode' => ['zip', 'code']
 	}
 
 	def parse_options(opts)
