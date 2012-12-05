@@ -40,6 +40,10 @@ class GoCartDef
 		end
 	end
 
+	def split_args(value)
+		return value.gsub(/^[\"\']/,'').gsub(/[\"\']$/,'').split(/\s*,\s*/)
+	end
+
 	def get_instance(class_name)
 		parts = class_name.split('::')
 		return Kernel.const_get(parts[0]).new if parts.length == 1

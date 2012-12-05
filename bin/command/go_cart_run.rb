@@ -148,9 +148,5 @@ private
 		return dbconfig
 	end
 
-	def split_args(value)
-		return value.gsub(/^[\"\']/,'').gsub(/[\"\']$/,'').split(/\s*,\s*/)
-	end
-
 end
 end

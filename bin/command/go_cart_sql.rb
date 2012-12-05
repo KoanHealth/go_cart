@@ -6,8 +6,8 @@ class GoCartSql < GoCartDef
 	attr_accessor :from_format, :from_schema, :from_table, :to_format, :to_schema, :to_table
 
 	def execute()
-		require @from_format
-		require @to_format
+		Runner.load_formats(@from_format)
+		Runner.load_formats(@to_format)
 
 		from_schema = get_instance(@from_schema)
 		to_schema = get_instance(@to_schema)
@@ -32,37 +32,73 @@ class GoCartSql < GoCartDef
 		to_words = {}
 		to_table.fields.each do |symbol, field|
 			to_words[symbol] = split_into_words(symbol.to_s)
+			mapping[symbol] = nil
 		end
 
-		to_words.each do |to_symbol, to_list|
-			mapping[to_symbol] = nil
-			from_words.each do |from_symbol, from_list|
-				hits = misses = 0
-				to_list.each do |to_word|
-					if from_list.include?(to_word)
-						hits += 1
-					else
-						misses += 1
-					end
-				end
-				extra = from_list.count - hits
-
-				if misses >= 0 && (hits > 1 || extra < 1)
-					mapping[to_symbol] = from_symbol
-					next
-				end
-			end
+		compare(mapping, to_words, from_words) do |m, to_list, from_list|
+			is_exact_match?(m, to_list, from_list)
 		end
-
+		compare(mapping, to_words, from_words) do |m, to_list, from_list|
+			is_closer_match?(m, to_list, from_list)
+		end
+		compare(mapping, to_words, from_words) do |m, to_list, from_list|
+			is_close_match?(m, to_list, from_list)
+		end
 		return mapping
 	end
 
+	def compare(mapping, to_words, from_words, &block)
+		to_words.each do |to_symbol, to_list|
+			next unless mapping[to_symbol].nil?
+			from_words.each do |from_symbol, from_list|
+				if block.call(mapping, to_list, from_list)
+					mapping[to_symbol] = from_symbol
+				end
+			end
+		end
+	end
+
+	def is_exact_match?(mapping, to_list, from_list)
+		hits, misses, extra = tally_matches(to_list, from_list)
+		return misses < 1 && hits > 1 && extra < 1
+	end
+
+	def is_closer_match?(mapping, to_list, from_list)
+		hits, misses, extra = tally_matches(to_list, from_list)
+		return misses < 1 && (hits > 1 || extra < 1)
+	end
+
+	def is_close_match?(mapping, to_list, from_list)
+		hits, misses, extra = tally_matches(to_list, from_list)
+		return misses < 2 && (hits > 1 || extra < 1)
+	end
+
+	def tally_matches(to_list, from_list)
+		hits = misses = 0
+		to_list.each do |to_word|
+			if from_list.include?(to_word)
+				hits += 1
+			else
+				misses += 1
+			end
+		end
+		return hits, misses, from_list.count - hits
+	end
+
 	def split_into_words(name)
-		name = name.gsub(/(.+)(\d+)/, '\1_\2')
+		name = name.gsub(/(\D+)(\d+)/, '\1_\2')
 		parts = name.split(/_+/)
-		parts.reject! { |word| reject_word(word) }
 		parts.map! { |word| replace_word(word) }
-		return parts
+		parts.reject! { |word| reject_word(word) }
+		return parts.flatten
+	end
+
+	def reject_word(word)
+		@@rejects[word] || false
+	end
+
+	def replace_word(word)
+		@@replacements[word] || word
 	end
 
 	@@rejects = {
@@ -73,11 +109,16 @@ class GoCartSql < GoCartDef
 			'or' => true,
 	}
 
-	def reject_word(word)
-		return @@rejects[word] || false
-	end
-
 	@@replacements = {
+			'1st' => '1',
+			'2nd' => '2',
+			'3rd' => '3',
+			'4th' => '4',
+			'5th' => '5',
+			'6th' => '6',
+			'7th' => '7',
+			'8th' => '8',
+			'9th' => '9',
 	    'alt' => 'alternate',
 	    'amt' => 'amount',
 	    'beg' => 'begin',
@@ -87,14 +128,17 @@ class GoCartSql < GoCartDef
 	    'dep' => 'dependent',
 	    'diag' => 'diagnosis',
 	    'div' => 'division',
-	    'dob' => 'birthdate',
+	    'dob' => ['date', 'of', 'birth'],
+	    'dos' => ['date', 'of', 'service'],
 	    'dt' => 'date',
 	    'dx' => 'diagnosis',
 	    'ee' => 'employee',
 	    'eff' => 'effective',
 	    'flg' => 'flag',
+	    'frm' => 'from',
 	    'grp' => 'group',
 	    'id' => 'identifier',
+	    'ip' => 'inpatient',
 	    'ln' => 'line',
 	    'loc' => 'location',
 	    'mbr' => 'member',
@@ -103,19 +147,25 @@ class GoCartSql < GoCartDef
 	    'mid' => 'middle',
 	    'mod' => 'modifier',
 	    'nbr' => 'number',
+	    'ndc' => ['national', 'drug', 'code'],
 	    'nm' => 'name',
+	    'no' => 'number',
 	    'num' => 'number',
+	    'op' => 'outpatient',
 	    'org' => 'organization',
 	    'orig' => 'original',
 	    'pd' => 'paid',
 	    'phys' => 'physician',
+	    'poa' => ['present', 'on', 'admission'],
+	    'pos' => ['place', 'of', 'service'],
 	    'pri' => 'primary',
 	    'proc' => 'procedure',
 	    'prov' => 'provider',
 	    'prv' => 'provider',
+	    'qty' => 'quantity',
 	    'rel' => 'relationship',
 	    'rev' => 'revenue',
-	    'rx' => 'pharmacy',
+	    'rx' => 'drug',  # 'pharmacy',
 	    'sec' => 'secondary',
 	    'seq' => 'sequence',
 	    'serv' => 'service',
@@ -124,17 +174,16 @@ class GoCartSql < GoCartDef
 	    'st' => 'state',
 	    'svc' => 'service',
 	    'term' => 'termination',
+	    'thr' => 'through',
 	    'thru' => 'through',
+	    'tob' => ['type', 'of', 'bill'],
 	    'tot' => 'total',
 	    'typ' => 'type',
 	    'un' => 'units',
 	    'val' => 'value',
 	    'ver' => 'version',
+	    'zip' => ['zip', 'code']
 	}
-
-	def replace_word(word)
-		return @@replacements[word] || word
-	end
 
 	def parse_options(opts)
 		opts.banner = "Usage: #{$0} sql [OPTIONS] --from FORMATFILE --from_schema SCHEMACLASS --from_table TABLENAME --to FORMATFILE --to_schema SCHEMACLASS --to_table TABLENAME"
@@ -144,7 +193,7 @@ class GoCartSql < GoCartDef
 		opts.separator 'OPTIONS:'
 
 		opts.on('--from FORMATFILE', 'format filename') do |value|
-			@from_format = value
+			@from_format = split_args(value)
 		end
 
 		opts.on('--from_schema SCHEMANAME', 'fully qualified schema classname') do |value|
@@ -156,7 +205,7 @@ class GoCartSql < GoCartDef
 		end
 
 		opts.on('--to FORMATFILE', 'format filename') do |value|
-			@to_format = value
+			@to_format = split_args(value)
 		end
 
 		opts.on('--to_schema SCHEMANAME', 'fully qualified schema classname') do |value|
