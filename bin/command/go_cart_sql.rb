@@ -6,19 +6,31 @@ class GoCartSql < GoCartDef
 	attr_accessor :from_format, :from_schema, :from_table, :to_format, :to_schema, :to_table
 
 	def execute()
-		Runner.load_formats(@from_format)
-		Runner.load_formats(@to_format)
+		Runner.load_formats(@from_format) unless @from_format.nil?
+		Runner.load_formats(@to_format) unless @to_format.nil?
 
-		from_schema = get_instance(@from_schema)
-		to_schema = get_instance(@to_schema)
+		from_table = get_table(@from_schema, @from_table)
+		to_table = get_table(@to_schema, @to_table)
 
-		from_table = from_schema.get_table(@from_table.to_sym)
-		to_table = to_schema.get_table(@to_table.to_sym)
-
+		# mapping variable is used by ERB template
 		mapping = map_fields(from_table, to_table)
 		template_directory = File.join(@script_dir, '../../templates')
 		template = IO.read(File.join(template_directory, 'insert_select.sql.erb'))
 		puts ERB.new(template).result(binding)
+	end
+
+	def get_table(schema_class, table_name)
+		if schema_class.nil?
+			Mapper::get_all_mapper_classes.each do |mapper_class|
+				mapper = mapper_class.new
+				table = mapper.schema.get_table(table_name.to_sym)
+				return table unless table.nil?
+			end
+		else
+			schema = get_instance(schema_class)
+			return schema.get_table(table_name.to_sym) unless schema.nil?
+		end
+		raise "Unable to find table \"#{table_name}\""
 	end
 
 	def map_fields(from_table, to_table)
@@ -53,6 +65,7 @@ class GoCartSql < GoCartDef
 			from_words.each do |from_symbol, from_list|
 				if block.call(mapping, to_list, from_list)
 					mapping[to_symbol] = from_symbol
+					break
 				end
 			end
 		end
@@ -186,7 +199,7 @@ class GoCartSql < GoCartDef
 	}
 
 	def parse_options(opts)
-		opts.banner = "Usage: #{$0} sql [OPTIONS] --from FORMATFILE --from_schema SCHEMACLASS --from_table TABLENAME --to FORMATFILE --to_schema SCHEMACLASS --to_table TABLENAME"
+		opts.banner = "Usage: #{$0} sql [OPTIONS] --from FORMATFILE [--from_schema SCHEMACLASS] --from_table TABLENAME [--to FORMATFILE] [--to_schema SCHEMACLASS] --to_table TABLENAME"
 		opts.separator ''
 		opts.separator 'Generates a sql insert statement from one table to another'
 		opts.separator ''
