@@ -6,8 +6,8 @@ class DialectMySql
 	end
 
 	def prepare_row(row)
-      # MySql requires \N to differentiate NULL from empty
-      return row.map { |field| field.nil? ? "\\N" : field }
+		# MySql requires \N to differentiate NULL from empty
+		return row.map { |field| field.nil? ? "\\N" : field }
 	end
 
 	def load_from_file(connection, schema_table, table_name, filename)

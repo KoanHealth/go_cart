@@ -5,6 +5,12 @@ class GoCartSql < GoCartDef
 
 	attr_accessor :from_format, :from_schema, :from_table, :to_format, :to_schema, :to_table
 
+	def initialize()
+		super
+		@ignore_words = {}
+		@replace_words = {}
+	end
+
 	def execute()
 		Runner.load_formats(@from_format) unless @from_format.nil?
 		Runner.load_formats(@to_format) unless @to_format.nil?
@@ -107,11 +113,11 @@ class GoCartSql < GoCartDef
 	end
 
 	def reject_word(word)
-		@@rejects[word] || false
+		@ignore_words[word] || @@rejects[word] || false
 	end
 
 	def replace_word(word)
-		@@replacements[word] || word
+		@replace_words[word] || @@replacements[word] || word
 	end
 
 	@@rejects = {
@@ -227,6 +233,16 @@ class GoCartSql < GoCartDef
 
 		opts.on('--to_table TABLENAME', 'table name') do |value|
 			@to_table = value
+		end
+
+		opts.on('--ignore WORD', 'ignore word in field names when matching') do |value|
+			@ignore_words[value] = true
+		end
+
+		opts.on('--replace OLDWORD=NEWWORD', 'replace word in field names when matching') do |value|
+			words = value.split('=')
+			raise "Invalid replacement: #{value}" if words.size != 2
+			@replace_words[words.first] = words.last
 		end
 
 		parse_def_options opts

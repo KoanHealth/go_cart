@@ -6,8 +6,8 @@ class DialectPostgresql
 	end
 
 	def prepare_row(row)
-      # In PostgreSQL CSV empty is NULL
-      return row
+		# In PostgreSQL CSV empty is NULL
+		return row
 	end
 
 	def load_from_file(connection, schema_table, table_name, filename)
