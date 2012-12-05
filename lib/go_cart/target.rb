@@ -19,11 +19,11 @@ class Target
 		end
 	end
 
-	def save_table(dbconfig, dialect, schema_table, filename)
+	def save_table(dbconfig, dialect, schema_table, filename, options = {})
 		open_database_connection dbconfig
 		begin
 			table_name = get_table_name(schema_table.symbol)
-			dialect.save_to_file(ActiveRecord::Base.connection, schema_table, table_name, filename)
+			dialect.save_to_file(ActiveRecord::Base.connection, schema_table, table_name, filename, options)
 		ensure
 			close_database_connection
 		end

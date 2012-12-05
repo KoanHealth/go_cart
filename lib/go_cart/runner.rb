@@ -96,7 +96,7 @@ class Runner
 		target = Target.new()
 	  target.db_suffix = options[:db_suffix]
 	  target.db_schema = options[:db_schema]
-	  target.save_table(dbconfig, get_dialect(dbconfig), schema_table, filename)
+	  target.save_table(dbconfig, get_dialect(dbconfig), schema_table, filename, options)
 	end
 
 	def self.drop_db_schema(dbconfig, schema_name)

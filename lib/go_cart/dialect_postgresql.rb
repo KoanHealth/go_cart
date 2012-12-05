@@ -24,9 +24,9 @@ class DialectPostgresql
 		while raw_connection.get_result do end
 	end
 
-	def save_to_file(connection, schema_table, table_name, filename)
+	def save_to_file(connection, schema_table, table_name, filename, options = {})
 		raw_connection = connection.raw_connection
-		sql_cmd = generate_save_command(schema_table, table_name)
+		sql_cmd = generate_save_command(schema_table, table_name, options)
 		result = raw_connection.exec sql_cmd
 
 		File.open(filename, 'w') do |file|
@@ -53,17 +53,40 @@ private
 		END_OF_QUERY
 	end
 
-	def generate_save_command(schema_table, table_name)
+	def generate_save_command(schema_table, table_name, options = {})
 		columns = schema_table.get_columns()
 		e_field = 'E' if @field_separator.ord < 32
 		delimiter = @field_separator.inspect[1..-2]
 
-		return <<-END_OF_QUERY
-			COPY #{table_name} (
-			#{columns.map { |symbol| "\"#{symbol}\"" }.join(',')}
-			) TO STDOUT
-			WITH DELIMITER #{e_field}'#{delimiter}' CSV HEADER
-		END_OF_QUERY
+		order_by = get_order_by(options)
+		if order_by.nil?
+			return <<-END_OF_QUERY
+				COPY #{table_name} (
+				#{columns.map { |symbol| "\"#{symbol}\"" }.join(',')}
+				) TO STDOUT
+				WITH DELIMITER #{e_field}'#{delimiter}' CSV HEADER
+			END_OF_QUERY
+		else
+			return <<-END_OF_QUERY
+				COPY ( SELECT
+				#{columns.map { |symbol| "\"#{symbol}\"" }.join(',')}
+				FROM #{table_name}#{order_by}
+				) TO STDOUT
+				WITH DELIMITER #{e_field}'#{delimiter}' CSV HEADER
+			END_OF_QUERY
+		end
+	end
+
+	def get_order_by(options)
+		order = options[:order_by]
+		return nil if order.nil? || order.empty?
+
+		suffix = []
+		order.each do |column, direction|
+			sql_dir = (direction == :desc ? 'DESC' : 'ASC')
+			suffix << "#{column} #{sql_dir}"
+		end
+		return ' ORDER BY ' + suffix.join(',')
 	end
 
 end
