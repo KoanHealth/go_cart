@@ -20,14 +20,6 @@ class GoCartSql < GoCartDef
 		puts ERB.new(template).result(binding)
 	end
 
-	def setup_generator(generator)
-		template_directory = File.join(@script_dir, '../../templates')
-		generator.template_directory = template_directory
-		generator.module_name = @module_name
-		generator.class_name = @class_name
-		return generator
-	end
-
 	def parse_options(opts)
 		opts.banner = "Usage: #{$0} sql [OPTIONS] --from FORMATFILE --from_schema SCHEMACLASS --from_table TABLENAME --to FORMATFILE --to_schema SCHEMACLASS --to_table TABLENAME"
 		opts.separator ''
