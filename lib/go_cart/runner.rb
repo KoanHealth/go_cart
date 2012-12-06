@@ -11,7 +11,7 @@ class Runner
 	def self.load_formats(formats)
 		formats.each do |format|
 			file_count = 0
-			Dir.glob(format) do |format_file|
+			Dir.glob(File.expand_path(format)) do |format_file|
 				require format_file
 				file_count += 1
 			end
