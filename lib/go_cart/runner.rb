@@ -119,7 +119,10 @@ private
 			mapper = mapper_class.new
 		end
 		format_table = get_format_table(mapper, file)
-		raise "Unrecognized headers in file #{file}" if format_table.nil?
+		if format_table.nil?
+			headers = FileUtils.get_headers(file)
+			raise "Unrecognized headers: " + headers.join(',')
+		end
 		return mapper, format_table
 	end
 
