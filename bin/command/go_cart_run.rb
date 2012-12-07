@@ -27,7 +27,7 @@ class GoCartRun < GoCartDef
 			raise "Must specify fully qualified schema or mapper class name" if schema.nil?
       runner.create_schema_tables(dbconfig, get_schema, options)
     else
-      runner.load_data_files(dbconfig, Dir.glob(@data_file), get_mapper, options)
+      runner.load_data_files(dbconfig, Dir.glob(File.expand_path(@data_file)), get_mapper, options)
 	  end
   end
 

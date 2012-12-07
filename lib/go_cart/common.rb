@@ -78,7 +78,16 @@ class CommonTable
 	def matches?(headers)
 		if headers.size >= @fields.size
 			@fields.each do |symbol, field|
-				return false unless headers.include? field.header
+				found_it = false
+				headers.each do |header|
+					if header.casecmp(field.header || field.name) == 0
+						found_it = true
+						break
+					end
+				end
+				return false unless found_it
+				# Case-sensitive:
+				#return false unless headers.include? field.header
 			end
 			return true
 		end
