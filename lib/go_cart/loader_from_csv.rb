@@ -19,7 +19,7 @@ class LoaderFromCsv < Loader
 						row.each do |raw_symbol, header|
 							next if raw_symbol.nil?
 							field = format_table.get_field_by_header(header)
-							raise "Unrecognized field header: #{header}" if field.nil?
+							raise "Unrecognized header: #{header}" if field.nil?
 							symbol_map[raw_symbol] = field.symbol
 						end
 						next

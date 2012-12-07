@@ -34,7 +34,7 @@ class FormatTable < CommonTable
 		end
 		unless field.header.nil?
 			raise "Duplicate field header: #{field.symbol}" unless @fields_by_header[field.header].nil?
-			@fields_by_header[field.header] = field
+			@fields_by_header[field.header.downcase] = field
 			@headers = true
 		end
 		if @fixed_length.nil?
@@ -48,7 +48,7 @@ class FormatTable < CommonTable
 	end
 
 	def get_field_by_header(header)
-		return @fields_by_header[header]
+		return @fields_by_header[header.downcase]
 	end
 
 	def field(symbol, type, options = {})

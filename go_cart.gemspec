@@ -21,6 +21,7 @@ Gem::Specification.new do |gem|
 	gem.add_dependency "colorize"
 	gem.add_dependency "activerecord"
 	gem.add_dependency "activerecord-import"
+	gem.add_dependency "pg"
 
 	gem.add_development_dependency "rspec"
 end
