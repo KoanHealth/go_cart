@@ -8,7 +8,7 @@ class FileUtils
   MAX_LINE_LENGTH = 50000
 
   def self.has_headers?(input_file)
-		return get_csv_options(input_file)[:headers]
+		return get_csv_options(input_file, true)[:headers]
  	end
 
 	def self.get_headers(input_file)
@@ -27,7 +27,7 @@ class FileUtils
 		return headers
 	end
 
-	def self.get_csv_options(input_file)
+	def self.get_csv_options(input_file, ignore_noncsv = false)
 		samples = 0
 		has_header = false
 		separators = Hash.new { |h,k| h[k] = 0 }
@@ -57,7 +57,7 @@ class FileUtils
 				options[:headers] = false
 			end
 		else
-			raise 'Data file is not a CSV file'
+			raise 'Data file is not a CSV file' unless ignore_noncsv
 		end
 		return options
 	end
