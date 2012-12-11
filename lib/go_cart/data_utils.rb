@@ -51,27 +51,31 @@ class DataUtils
 		return nil if value == '00000000' || value =~ /^00\W00\W0000$/ || value =~ /^0000\W00\W00$/
 		return nil if value == '99999999' || value =~ /^99\W99\W9999$/ || value =~ /^9999\W99\W99$/
 
+		if value =~ /^(.+)\s+\d{1,2}:\d{2}:\d{2}/
+			value = $1
+		end
+
 		patterns = [
 			[ /^([01]\d)([0123]\d)([129]\d{3})$/, [2,0,1] ],        # MMDDYYYY
 	    [ /^([01]\d)\W([0123]\d)\W([129]\d{3})$/, [2,0,1] ],    # MM-DD-YYYY
-	    [ /^(\d{1,2})\W(\d{1,2})\W([129]\d{3})$/, [2,0,1] ],    # M-D-YYYY
+	    [ /^(\d{1,2})\W(\d{1,2})\W([12]\d{3})$/, [2,0,1] ],     # M-D-YYYY
 
 			[ /^([129]\d{3})([01]\d)([0123]\d)$/, [0,1,2] ],        # YYYYMMDD
 	    [ /^([129]\d{3})\W([01]\d)\W([0123]\d)$/, [0,1,2] ],    # YYYY-MM-DD
-	    [ /^([129]\d{3})\W(\d{1,2})\W(\d{1,2})$/, [0,1,2] ],    # YYYY-M-D
+	    [ /^([12]\d{3})\W(\d{1,2})\W(\d{1,2})$/, [0,1,2] ],     # YYYY-M-D
 		]
 		patterns.each do |test|
 			if value =~ test[0]
 				order = test[1]
 				parts = [ $1, $2, $3 ]
-				y = parts[order[0]]
-				m = parts[order[1]]
-				d = parts[order[2]]
+				y = parts[order[0]].to_i
+				m = parts[order[1]].to_i
+				d = parts[order[2]].to_i
 
-				next if y < '1800' || y > '3000' unless y == '9999'
-				next if m < '01' || m > '12'
-				next if d < '01' || d > '31'
-				value = "#{y}-#{m}-#{d}"
+				next if y < 1800 || y > 3000
+				next if m < 1 || m > 12
+				next if d < 1 || d > 31
+				value = "#{y}-#{"%02d"%m}-#{"%02d"%d}"
 				break
 			end
 		end
