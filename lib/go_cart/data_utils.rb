@@ -49,25 +49,31 @@ class DataUtils
 	def self.extract_date(value)
 		# Null/Empty
 		return nil if value == '00000000' || value =~ /^00\W00\W0000$/ || value =~ /^0000\W00\W00$/
+		return nil if value == '99999999' || value =~ /^99\W99\W9999$/ || value =~ /^9999\W99\W99$/
 
-		# MMDDYYYY
-		if value =~ /^([01]\d)([0123]\d)([129]\d{3})$/
-			value = "#{$3}-#{$1}-#{$2}"
-		# MM-DD-YYYY
-    elsif value =~ /^([01]\d)\W([0123]\d)\W([129]\d{3})$/
-  			value = "#{$3}-#{$1}-#{$2}"
-		# M-D-YYYY
-    elsif value =~ /^(\d{1,2})\W(\d{1,2})\W([129]\d{3})$/
-  			value = "#{$3}-#{$1}-#{$2}"
-		# YYYYMMDD
-		elsif value =~ /^([129]\d{3})([01]\d)([0123]\d)$/
-			value = "#{$1}-#{$2}-#{$3}"
-		# YYYY-MM-DD
-    elsif value =~ /^([129]\d{3})\W([01]\d)\W([0123]\d)$/
-  			value = "#{$1}-#{$2}-#{$3}"
-		# YYYY-M-D
-    elsif value =~ /^([129]\d{3})\W(\d{1,2})\W(\d{1,2})$/
-  			value = "#{$1}-#{$2}-#{$3}"
+		patterns = [
+			[ /^([01]\d)([0123]\d)([129]\d{3})$/, [2,0,1] ],        # MMDDYYYY
+	    [ /^([01]\d)\W([0123]\d)\W([129]\d{3})$/, [2,0,1] ],    # MM-DD-YYYY
+	    [ /^(\d{1,2})\W(\d{1,2})\W([129]\d{3})$/, [2,0,1] ],    # M-D-YYYY
+
+			[ /^([129]\d{3})([01]\d)([0123]\d)$/, [0,1,2] ],        # YYYYMMDD
+	    [ /^([129]\d{3})\W([01]\d)\W([0123]\d)$/, [0,1,2] ],    # YYYY-MM-DD
+	    [ /^([129]\d{3})\W(\d{1,2})\W(\d{1,2})$/, [0,1,2] ],    # YYYY-M-D
+		]
+		patterns.each do |test|
+			if value =~ test[0]
+				order = test[1]
+				parts = [ $1, $2, $3 ]
+				y = parts[order[0]]
+				m = parts[order[1]]
+				d = parts[order[2]]
+
+				next if y < '1800' || y > '3000' unless y == '9999'
+				next if m < '01' || m > '12'
+				next if d < '01' || d > '31'
+				value = "#{y}-#{m}-#{d}"
+				break
+			end
 		end
 
 		# OK, I give up

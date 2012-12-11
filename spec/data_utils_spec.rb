@@ -24,6 +24,8 @@ describe "Extract Values" do
       '9999/1/2' => Date.new(9999,1,2),
       '01022001' => Date.new(2001,1,2),
       '20010102' => Date.new(2001,1,2),
+      '10011934' => Date.new(1934,10,1),
+      '19341011' => Date.new(1934,10,11),
       '12345678' => :exception,
       '12/34/5678' => :exception,
     })
