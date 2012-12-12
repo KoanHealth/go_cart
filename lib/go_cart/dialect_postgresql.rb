@@ -21,7 +21,9 @@ class DialectPostgresql
 		raw_connection.put_copy_end
 
 		# pump out the result stream
-		while raw_connection.get_result do end
+		while result = raw_connection.get_result do
+			result.check_result
+		end
 	end
 
 	def save_to_file(connection, schema_table, table_name, filename, options = {})
@@ -49,7 +51,7 @@ private
 			COPY #{table_name} (
 			#{columns.map { |symbol| "\"#{symbol}\"" }.join(',')}
 			) FROM STDIN
-			WITH DELIMITER #{e_field}'#{delimiter}' CSV HEADER
+			WITH DELIMITER #{e_field}'#{delimiter}' CSV HEADER;
 		END_OF_QUERY
 	end
 
@@ -64,7 +66,7 @@ private
 				COPY #{table_name} (
 				#{columns.map { |symbol| "\"#{symbol}\"" }.join(',')}
 				) TO STDOUT
-				WITH DELIMITER #{e_field}'#{delimiter}' CSV HEADER
+				WITH DELIMITER #{e_field}'#{delimiter}' CSV HEADER;
 			END_OF_QUERY
 		else
 			return <<-END_OF_QUERY
@@ -72,7 +74,7 @@ private
 				#{columns.map { |symbol| "\"#{symbol}\"" }.join(',')}
 				FROM #{table_name}#{order_by}
 				) TO STDOUT
-				WITH DELIMITER #{e_field}'#{delimiter}' CSV HEADER
+				WITH DELIMITER #{e_field}'#{delimiter}' CSV HEADER;
 			END_OF_QUERY
 		end
 	end
