@@ -147,7 +147,6 @@ private
 	end
 
 	def load_options(options)
-		@table_names = options[:table_names]
 		@db_suffix = options[:db_suffix]
 		@db_schema = options[:db_schema]
 
