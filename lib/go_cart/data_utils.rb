@@ -81,7 +81,11 @@ class DataUtils
 		end
 
 		# OK, I give up
-		return Date.parse value
+		begin
+			return Date.parse value
+		rescue
+			raise "Invalid date: #{value}"
+		end
 	end
 
 end
