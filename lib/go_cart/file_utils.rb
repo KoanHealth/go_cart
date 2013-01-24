@@ -55,7 +55,8 @@ class FileUtils
 				options[:header_converters] = :symbol
 			else
 				options[:headers] = false
-			end
+      end
+      options[:row_sep] = eol_char
 		else
 			raise 'Data file is not a CSV file' unless ignore_noncsv
 		end

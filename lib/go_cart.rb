@@ -23,3 +23,6 @@ require 'go_cart/loader_from_fixed'
 require 'go_cart/target'
 require 'go_cart/target_db'
 require 'go_cart/target_file'
+
+# Files after this point are from the modular go-cart effort
+require 'go_cart/loader/csv_loader'
