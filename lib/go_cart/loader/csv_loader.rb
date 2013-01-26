@@ -10,17 +10,27 @@ module GoCart
     end
 
     def each
-      CSV.foreach(@file_name, options) do |row|
-        if @options[:headers] && row.header_row?
-          @symbol_map = extract_headers row, @format_table
-          next
+      # Values turn blanks to nil and strip whitespace
+      cleaner = ->(s) do
+        return nil if s.nil?
+        s.strip!
+        s.empty? ? nil : s
+      end
+
+      CSV.open(@file_name, 'r+', {converters:[cleaner]}.merge(options)) do |file|
+
+        while row = file.readline
+          if @options[:headers] && row.header_row?
+            @symbol_map = extract_headers row, @format_table
+            next
+          end
+
+          next unless filter.nil? || filter.call(row)
+
+          yield options[:headers] ?
+              process_row_with_header(row, @format_table, @symbol_map) :
+              process_row_with_index(row, @format_table)
         end
-
-        next unless filter.nil? || filter.call(row)
-
-        yield options[:headers] ?
-            process_row_with_header(row, @format_table, @symbol_map) :
-            process_row_with_index(row, @format_table)
       end
     end
 

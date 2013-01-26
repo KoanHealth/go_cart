@@ -29,9 +29,9 @@ describe "Inspect CSV files" do
 	  check_csv_options(
 		  {
 				@samples[0] => :exception,
-				@samples[1] => { headers: true, col_sep: ',' },
-			  @samples[2] => { headers: true, col_sep: ',' },
-			  @samples[3] => { headers: false, col_sep: ',' },
+				@samples[1] => { headers: true, col_sep: ',', row_sep: "\n" },
+			  @samples[2] => { headers: true, col_sep: ',', row_sep: "\r" },
+			  @samples[3] => { headers: false, col_sep: ',', row_sep: "\r\n" },
 			  @samples[4] => { headers: false, col_sep: ',' },
 			  @samples[5] => { headers: true, col_sep: ',' },
 			  @samples[6] => { headers: true, col_sep: '|' },

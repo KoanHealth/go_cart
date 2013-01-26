@@ -64,14 +64,14 @@ class FileUtils
 	end
 
   def self.get_eol_char(input_file)
-    eol_char = nil
-    File.open(input_file, 'r') do |io|
+    eol_char = ''
+    File.open(input_file, 'r+') do |io|
       until io.eof?
         io.read(CHAR_BUFFER_SIZE).each_char do |char|
           if char == "\n" || char == "\r"
-            eol_char = char
+            eol_char += char
           else
-            return eol_char unless eol_char.nil?
+            return eol_char unless eol_char.empty?
           end
         end
       end
