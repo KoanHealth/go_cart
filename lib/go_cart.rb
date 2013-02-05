@@ -26,3 +26,5 @@ require 'go_cart/target_file'
 
 # Files after this point are from the modular go-cart effort
 require 'go_cart/loader/csv_loader'
+
+require 'go_cart/transform/hash_mapper'
