@@ -21,7 +21,7 @@ module GoCart
     let(:simple_row_data2) { [true, false, "mary", "2"].map(&:to_s) }
     let(:simple_row_data3) { [true, true, "jane", "3"].map(&:to_s) }
     let(:simple_row) { CSV::Row.new(simple_row_headers, simple_row_data0) }
-    let(:simple_row0) {simple_row}
+    let(:simple_row0) { simple_row }
     let(:simple_row1) { CSV::Row.new(simple_row_headers, simple_row_data1) }
     let(:simple_row2) { CSV::Row.new(simple_row_headers, simple_row_data2) }
     let(:simple_row3) { CSV::Row.new(simple_row_headers, simple_row_data3) }
@@ -36,8 +36,9 @@ module GoCart
       result[:field_three].should eq "bob"
       result[:field_four].should eq "0"
     end
+
     describe "basic 1:1 mapping without configuration" do
-      let(:mapper) {HashMapper.new}
+      let(:mapper) { HashMapper.new }
       it "should map values as strings" do
         result = mapper.map(simple_row)
         result.should be_kind_of Hash
@@ -47,7 +48,7 @@ module GoCart
     end
 
     describe "basic 1:1 mapping with configuration from row" do
-      let(:mapper) {HashMapper.new(simple_row)}
+      let(:mapper) { HashMapper.new(simple_row) }
       it "should map values as strings" do
         result = mapper.map(simple_row)
         result.should be_kind_of Hash
@@ -56,17 +57,17 @@ module GoCart
 
       it "should reject rows with smaller number of elements" do
         row = CSV::Row.new(simple_row_headers.dup.pop(3), simple_row_data0.dup.pop(3))
-        ->{mapper.map(row)}.should raise_exception
+        -> { mapper.map(row) }.should raise_exception
       end
 
       it "should reject rows with larger number of elements" do
         row = CSV::Row.new(simple_row_headers.dup.push(:extra), simple_row_data0.dup.push('read all about it'))
-        ->{mapper.map(row)}.should raise_exception
+        -> { mapper.map(row) }.should raise_exception
       end
     end
 
     describe "1:1 mapping described with hash" do
-      let(:mapper) {HashMapper.new(simple_map)}
+      let(:mapper) { HashMapper.new(simple_map) }
 
       it "should map values as strings" do
         result = mapper.map(simple_row)
@@ -76,17 +77,17 @@ module GoCart
 
       it "should reject rows with smaller number of elements" do
         row = CSV::Row.new(simple_row_headers.dup.pop(3), simple_row_data0.dup.pop(3))
-        ->{mapper.map(row)}.should raise_exception
+        -> { mapper.map(row) }.should raise_exception
       end
 
       it "should reject rows with larger number of elements" do
         row = CSV::Row.new(simple_row_headers.dup.push(:extra), simple_row_data0.dup.push('read all about it'))
-        ->{mapper.map(row)}.should raise_exception
+        -> { mapper.map(row) }.should raise_exception
       end
     end
 
     describe "1:1 mapping configured with row and hash" do
-      let(:mapper) {HashMapper.new(simple_row, simple_map)}
+      let(:mapper) { HashMapper.new(simple_row, simple_map) }
 
       it "should map values as strings" do
         result = mapper.map(simple_row)
@@ -96,18 +97,18 @@ module GoCart
 
       it "should reject rows with smaller number of elements" do
         row = CSV::Row.new(simple_row_headers.dup.pop(3), simple_row_data0.dup.pop(3))
-        ->{mapper.map(row)}.should raise_exception
+        -> { mapper.map(row) }.should raise_exception
       end
 
       it "should reject rows with larger number of elements" do
         row = CSV::Row.new(simple_row_headers.dup.push(:extra), simple_row_data0.dup.push('read all about it'))
-        ->{mapper.map(row)}.should raise_exception
+        -> { mapper.map(row) }.should raise_exception
       end
     end
 
     describe "Mapper configuration with GoCart table spec" do
-      let(:table) {SimpleFormat.new().get_table(:simple_format)}
-      let(:mapper) {HashMapper.new(table)}
+      let(:table) { SimpleFormat.new().get_table(:simple_format) }
+      let(:mapper) { HashMapper.new(table) }
 
       it "should map values as correct types" do
         result = mapper.map(simple_row0)
@@ -125,12 +126,12 @@ module GoCart
 
       it "should reject rows with smaller number of elements" do
         row = CSV::Row.new(simple_row_headers.dup.pop(3), simple_row_data0.dup.pop(3))
-        ->{mapper.map(row)}.should raise_exception
+        -> { mapper.map(row) }.should raise_exception
       end
 
       it "should reject rows with larger number of elements" do
         row = CSV::Row.new(simple_row_headers.dup.push(:extra), simple_row_data0.dup.push('read all about it'))
-        ->{mapper.map(row)}.should raise_exception
+        -> { mapper.map(row) }.should raise_exception
       end
 
       it "when empty block is supplied for configuration, all rows should map to empty hash" do
@@ -139,10 +140,65 @@ module GoCart
         new_mapper.map(simple_row1).should be_empty
       end
 
+      it "direct map all fields" do
+        new_mapper = HashMapper.new(table) do |m|
+          m.simple_map_others
+        end
+
+        result = new_mapper.map(simple_row0)
+        result[:field_one].should be_false
+        result[:field_two].should be_false
+        result[:field_three].should eq "bob"
+        result[:field_four].should eq 0
+
+        result = mapper.map(simple_row1)
+        result[:field_one].should be_false
+        result[:field_two].should be_true
+        result[:field_three].should eq "fred"
+        result[:field_four].should eq 1
+      end
+
+      it "direct map subset of fields" do
+        new_mapper = HashMapper.new(table) do |m  |
+          m.simple_map(:field_one, :field_four)
+        end
+
+        result = new_mapper.map(simple_row0)
+        result[:field_one].should be_false
+        result[:field_two].should be_nil
+        result[:field_three].should be_nil
+        result[:field_four].should eq 0
+      end
+
+      it "perform operation on field" do
+        new_mapper = HashMapper.new(table) do |m|
+          m.map(:field_three) { |v| v.upcase.reverse }
+        end
+
+        result = new_mapper.map(simple_row1)
+        result[:field_one].should be_nil
+        result[:field_two].should be_nil
+        result[:field_three].should eq "DERF"
+        result[:field_four].should be_nil
+      end
+
+      it "perform operation on field with simple_map_others" do
+        new_mapper = HashMapper.new(table) do |m|
+          m.map(:field_three) { |v| v.upcase.reverse }
+          m.simple_map_others
+        end
+
+        result = new_mapper.map(simple_row1)
+        result[:field_one].should be_false
+        result[:field_two].should be_true
+        result[:field_three].should eq "DERF"
+        result[:field_four].should eq 1
+      end
     end
 
+
     describe "mapping configured for name changes" do
-      let(:mapper) {HashMapper.new(simple_map_changes_names)}
+      let(:mapper) { HashMapper.new(simple_map_changes_names) }
 
       it "specified as hash should map values as strings" do
         result = mapper.map(simple_row0)
