@@ -6,14 +6,11 @@ module GoCart
         when 0 then @pending_configuration = ->(row) {initialize_with_csv_row(row, config_block)}
         when 1 then
           initialize_with_csv_row(args[0], config_block) if args[0].kind_of?(CSV::Row)
-          @pending_configuration = ->(row) { initialize_with_hash(row, args[0], config_block)} if args[0].kind_of?(Hash)
           @pending_configuration = ->(row) { initialize_with_format_table(row, args[0], config_block)} if args[0].kind_of?(FormatTable)
         when 2 then
-          initialize_with_hash(args[0], args[1], config_block)  if args[1].kind_of?(Hash)
           initialize_with_format_table(args[0], args[1], config_block)  if args[1].kind_of?(FormatTable)
         else
           raise "Invalid number of arguments for hash mapper"
-
       end
     end
 
@@ -72,17 +69,6 @@ module GoCart
       row.headers.each do |h|
         index = row.index(h)
         transform_map[h] = ->(r){r[index]}
-      end
-      evaluate_config_block(config_block)
-      @pending_configuration = nil
-    end
-
-    def initialize_with_hash(row, hash_configuration, config_block)
-      @expected_field_count = hash_configuration.count
-      @transform_map = {}
-      hash_configuration.each do |key,value|
-        index = row.index(value)
-        transform_map[key] = ->(r){r[index]}
       end
       evaluate_config_block(config_block)
       @pending_configuration = nil
