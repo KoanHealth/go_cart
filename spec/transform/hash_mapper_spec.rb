@@ -161,6 +161,25 @@ module GoCart
         result[:field_three].should eq "DERF"
         result[:field_four].should eq 1
       end
+
+      it "splitting an input to an array should be possible in a block" do
+
+        new_mapper = HashMapper.new(table) do |m|
+          m.map(:field_three) { |v| v.split(" ") }
+          m.simple_map_others
+        end
+
+        row = CSV::Row.new(simple_row_headers, [true, true, "dick jane fred wilma", "3"].map(&:to_s))
+
+        result = new_mapper.map(row)
+
+        result[:field_three].count.should eq 4
+        result[:field_three].should include('dick')
+        result[:field_three].should include('jane')
+        result[:field_three].should include('fred')
+        result[:field_three].should include('wilma')
+
+      end
     end
   end
 end
