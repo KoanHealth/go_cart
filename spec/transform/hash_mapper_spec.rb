@@ -116,7 +116,7 @@ module GoCart
       end
 
       it "direct map subset of fields" do
-        new_mapper = HashMapper.new(table) do |m  |
+        new_mapper = HashMapper.new(table) do |m|
           m.simple_map(:field_one, :field_four)
         end
 
@@ -137,6 +137,21 @@ module GoCart
         result[:field_two].should be_nil
         result[:field_three].should eq "DERF"
         result[:field_four].should be_nil
+      end
+
+      it "produce a constant" do
+        new_mapper = HashMapper.new(table) do |m|
+          m.constant(:ex_machina) { "ghost" }
+          m.constant(:ex_politca, "errors")
+        end
+
+        result = new_mapper.map(simple_row1)
+        result[:field_one].should be_nil
+        result[:field_two].should be_nil
+        result[:field_three].should be_nil
+        result[:field_four].should be_nil
+        result[:ex_machina].should eq "ghost"
+        result[:ex_politca].should eq "errors"
       end
 
       it "perform operation and rename on field" do
@@ -184,7 +199,7 @@ module GoCart
 
         new_mapper = HashMapper.new(table) do |m|
           m.map_object(:sub1) do |r|
-            r.map(:name, :field_three) {|v| v.upcase}
+            r.map(:name, :field_three) { |v| v.upcase }
             r.map(:useful, :field_one)
           end
           m.map_object(:sub2) do |r|
@@ -206,7 +221,79 @@ module GoCart
         result[:sub2][:count].should eq 3
         result[:sub2][:present].should be_true
       end
+    end
+
+    describe "ArrayOperations" do
+
+      class FauxFormats < GoCart::Format
+        def self.conditions
+          %w{congestive_heart_failure depression diabetes}
+        end
+
+        def self.indications
+          %w{condition rx_gaps mpr csa rx_untreated}
+        end
+
+        def self.assessment_row_headers
+          result = [:member_id]
+          conditions.each { |c| indications.each { |i| result.push "#{c}_#{i}".to_sym } }
+          result
+        end
+
+        def initialize
+          super
+          create_table :faux_assessment, :headers => true, :name => "faux_assessment" do |t|
+            FauxFormats.assessment_row_headers.each { |h| t.string h, header: h }
+          end
+        end
+      end
+
+
+      let(:assessment_row_headers) { FauxFormats.assessment_row_headers }
+      let(:assessment_table) { FauxFormats.new().get_table(:faux_assessment) }
+      let(:assessment_row_data0) { ["A001", "Rx", "", "", "", "N", "", "", "", "", "", "ICD", "2", "", "", "P"] }
+
+      it "validate data" do
+        mapper = HashMapper.new(assessment_table)
+        result = mapper.map(CSV::Row.new(assessment_row_headers, assessment_row_data0))
+
+        result[:member_id].should eq "A001"
+        result[:congestive_heart_failure_condition].should eq "Rx"
+        result[:diabetes_rx_untreated].should eq "P"
+      end
+
+      describe "Basic pivot operations" do
+        let(:mapper) do
+          HashMapper.new(assessment_table) do |m|
+            m.map :member_id
+
+            FauxFormats.conditions.each do |c|
+              m.map_object(:conditions, {array: true}) do |r|
+                r.map(:source, "#{c}_condition".to_sym)
+                r.map(:rx_gaps, :"#{c}_rx_gaps".to_sym)
+                r.map(:mpr, :"#{c}_mpr".to_sym)
+                r.map(:csa, :"#{c}_csa".to_sym)
+                r.map(:rx_untreated, :"#{c}_rx_untreated".to_sym)
+                r.constant(:name, c)
+              end
+            end
+          end
+        end
+
+        it "should produce a two element hash, with :conditions being an array " do
+          result = mapper.map(CSV::Row.new(assessment_row_headers, assessment_row_data0))
+          result[:member_id].should eq "A001"
+          result[:conditions].should be_kind_of Array
+
+
+        end
+      end
+
 
     end
   end
 end
+
+#TODO - Be able to skip mapping elements if the results are not meaningful
+#TODO - Re-mapping a field that is not an array should raise an exception
+#TODO - Dump nil fields, but have option to force their inclusion
