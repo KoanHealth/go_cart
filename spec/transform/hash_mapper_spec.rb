@@ -166,7 +166,6 @@ module GoCart
 
         new_mapper = HashMapper.new(table) do |m|
           m.map(:field_three) { |v| v.split(" ") }
-          m.simple_map_others
         end
 
         row = CSV::Row.new(simple_row_headers, [true, true, "dick jane fred wilma", "3"].map(&:to_s))
@@ -180,6 +179,34 @@ module GoCart
         result[:field_three].should include('wilma')
 
       end
+
+      it "splitting a row to a sub hash should be possible in a block" do
+
+        new_mapper = HashMapper.new(table) do |m|
+          m.map_object(:sub1) do |r|
+            r.map(:name, :field_three) {|v| v.upcase}
+            r.map(:useful, :field_one)
+          end
+          m.map_object(:sub2) do |r|
+            r.map(:present, :field_two)
+            r.map(:count, :field_four)
+          end
+        end
+
+        row = CSV::Row.new(simple_row_headers, [true, true, "dick", 3].map(&:to_s))
+
+        result = new_mapper.map(row)
+        result.count.should eq 2
+        result[:sub1].count.should eq 2
+        result[:sub2].count.should eq 2
+
+        result[:sub1][:name].should eq "DICK"
+        result[:sub1][:useful].should be_true
+
+        result[:sub2][:count].should eq 3
+        result[:sub2][:present].should be_true
+      end
+
     end
   end
 end

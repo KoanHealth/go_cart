@@ -5,6 +5,7 @@ module GoCart
       case args.count
         when 0 then @pending_configuration = ->(row) {initialize_with_csv_row(row, config_block)}
         when 1 then
+          initialize_as_child(args[0], config_block) if args[0].kind_of?(Config)
           initialize_with_csv_row(args[0], config_block) if args[0].kind_of?(CSV::Row)
           @pending_configuration = ->(row) { initialize_with_format_table(row, args[0], config_block)} if args[0].kind_of?(FormatTable)
         when 2 then
@@ -14,13 +15,14 @@ module GoCart
       end
     end
 
+
     def map(row)
       @pending_configuration.call(row) if @pending_configuration
 
-      raise "Mapper has not been correctly initialized" unless defined? @expected_field_count
+      raise "Mapper has not been correctly initialized" unless defined? initialized?
 
-      unless row.count == @expected_field_count
-        raise "Invalid Row.  #{row.count} columns encountered where #{@expected_field_count} expected"
+      unless row.count == expected_field_count
+        raise "Invalid Row.  #{row.count} columns encountered where #{expected_field_count} expected"
       end
 
       result = {}
@@ -29,14 +31,12 @@ module GoCart
     end
 
     class Config
-      def initialize(transform_map, raw_transform_map)
-        @transform_map = transform_map
-        @raw_transform_map = raw_transform_map
+      def initialize(mapper)
+        @mapper = mapper
       end
-      attr_reader :transform_map, :raw_transform_map
 
-      # Root of the mapping game.  Represents a symbol in the output hash.  By default, the source value
-      # will be a symbol with the same name in the CSV definition
+      # Represents transforming a symbol from the input to the output.  If only one symbol is specified the
+      # name of the symbol from the CSV record is assumed to be the same
       def map(destination_symbol, source_symbol = nil, &map_block)
         source_symbol = destination_symbol if source_symbol.nil?
         raise "Input row does not contain symbol #{source_symbol}" unless raw_transform_map[source_symbol]
@@ -49,23 +49,51 @@ module GoCart
         end
       end
 
+      def map_object(destination_symbol, &map_block)
+        raise "map object requires a block" unless map_block
+        child_map = HashMapper.new(self, &map_block)
+        transform_map[destination_symbol] = ->(row) {child_map.map(row)}
+      end
+
+      def map_row(destination_symbol, &map_block)
+        raise "map row requires a block" unless map_block
+
+        transform_map[destination_symbol] = ->(row) {map_block.call(row)}
+      end
+
       # Equivalent of calling simple_map with all of the symbols for which you haven't already specified a mapping
       def simple_map_others
-        raw_transform_map.keys.each {|s| transform_map[s] = @raw_transform_map[s] unless transform_map[s]}
+        raw_transform_map.keys.each {|s| transform_map[s] = raw_transform_map[s] unless transform_map[s]}
       end
 
       # Pass a list of symbols that should be directly mapped (key, type, and value)from the input to the root level of the output
       def simple_map(*fields)
         fields.each {|s| transform_map[s] = raw_transform_map[s]}
       end
+
+      private
+      def transform_map
+        @mapper.send :transform_map
+      end
+
+      def raw_transform_map
+        @mapper.send :raw_transform_map
+      end
     end
 
     private
-    attr_reader :transform_map
+    attr_reader :transform_map, :raw_transform_map
+
+    def initialized?
+      !raw_transform_map.nil?
+    end
+
+    def expected_field_count
+      raw_transform_map.count
+    end
 
     def initialize_with_csv_row(row, config_block)
-      @expected_field_count = row.count
-      @transform_map = {}
+      @raw_transform_map = @transform_map = {}
       row.headers.each do |h|
         index = row.index(h)
         transform_map[h] = ->(r){r[index]}
@@ -75,9 +103,7 @@ module GoCart
     end
 
     def initialize_with_format_table(row, format_table, config_block)
-      @expected_field_count = format_table.fields.count
-
-      @transform_map = {}
+      @raw_transform_map = @transform_map = {}
       format_table.fields.each do |key,value|
         index = row.index(value.header)
         type = value.type
@@ -87,13 +113,18 @@ module GoCart
       @pending_configuration = nil
     end
 
+    def initialize_as_child(parent_mapper, config_block)
+      @transform_map = {}
+      @raw_transform_map = parent_mapper.send :raw_transform_map
+      @pending_configuration = nil
+      config_block.call(Config.new(self))
+    end
+
     def evaluate_config_block(config_block)
       return unless config_block
 
-      @raw_transform_map = transform_map
       @transform_map = {}
-
-      config_block.call(Config.new(@transform_map, @raw_transform_map))
+      config_block.call(Config.new(self))
     end
   end
 end
