@@ -5,15 +5,26 @@ module GoCart
       @conditions = conditions
     end
 
-    # Represents transforming a symbol from the input to the output.  If only one symbol is specified the
-    # name of the symbol from the CSV record is assumed to be the same
-    def map(destination_symbol, source_symbol = nil, &map_block)
-      source_symbol = destination_symbol if source_symbol.nil?
-      raise "Input row does not contain symbol #{source_symbol}" unless raw_transform_map[source_symbol]
+    # Represents transforming some source from the input to the output.
+    #
+    #If only the destination symbol is specified, then the input is the CSV value with the header of the same name.
+    #If the second argument is specified as a string or symbol, then the input is the CSV value with the header of that name.
+    #If the second argument is specified as a ->(row) lambda, the return of the lambda will be placed in the out put
+    #
+    # In all cases, the transform block will be called if supplied
+    def map(destination_symbol, source = nil, &transform_block)
+      source = destination_symbol if source.nil?
+      source = source.to_sym if source.is_a? String
+      if source.is_a? Symbol
+        temp_source = raw_transform_map[source]
+        raise "Input row does not contain symbol #{source}" unless temp_source
+        source = temp_source
+      end
 
-      source = raw_transform_map[source_symbol]
-      if map_block
-        transform_map[destination_symbol] = guarded(->(row) { map_block.call(source.call(row)) })
+      raise "Invalid source specified" unless source.is_a? Proc
+
+      if transform_block
+        transform_map[destination_symbol] = guarded(->(row) { transform_block.call(source.call(row)) })
       else
         transform_map[destination_symbol] = guarded(source)
       end
@@ -60,7 +71,7 @@ module GoCart
     end
 
     def unless(condition, &condition_block)
-      self.if(->(row) {!condition.call(row)}) &condition_block
+      self.if(->(row) {!condition.call(row)}, &condition_block)
     end
 
     private

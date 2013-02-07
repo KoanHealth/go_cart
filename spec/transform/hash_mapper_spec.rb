@@ -227,28 +227,117 @@ module GoCart
         result[:sub2][:present].should be_true
       end
 
-      describe "Conditional Operations" do
-        let(:mapper) do
-          HashMapper.new(table) do |m|
-            m.if(->(row) { row[:field_one] }) do |i|
-              i.map(:name, :field_three) {}
-            end
+      it "a better syntax for splitting a row" do
+        new_mapper = HashMapper.new(table) do |m|
+          m.map :sub1, ->(r) do
+            {
+                name: r[:field_three].upcase,
+                useful: r[:field_one]
+            }
+          end
+          m.map :sub2, ->(r) do
+            {
+                present: r[:field_two],
+                count: r[:field_four]
+            }
           end
         end
 
+        row = CSV::Row.new(simple_row_headers, [true, true, "dick", 3].map(&:to_s))
+
+        result = new_mapper.map(row)
+        result.count.should eq 2
+        result[:sub1].count.should eq 2
+        result[:sub2].count.should eq 2
+
+        result[:sub1][:name].should eq "DICK"
+        result[:sub1][:useful].should be_true
+
+        result[:sub2][:count].should eq 3
+        result[:sub2][:present].should be_true
+      end
+
+      describe "Conditional Operations" do
         it "should conditionally map rows" do
+          mapper = HashMapper.new(table) do |m|
+            m.if(->(row) { row[:field_one] }) do |i|
+              i.map(:name, :field_three) { |v| v.upcase }
+            end
+          end
+
           mapper.map(simple_row0).should be_nil
           mapper.map(simple_row1).should be_nil
           mapper.map(simple_row2)[:name].should eq 'MARY'
           mapper.map(simple_row3)[:name].should eq 'JANE'
         end
+
+        it "should conditionally map rows with unless" do
+          mapper = HashMapper.new(table) do |m|
+            m.unless(->(row) { row[:field_one] }) do |u|
+              u.map(:name, :field_three) { |v| v.upcase }
+            end
+          end
+
+          mapper.map(simple_row0)[:name].should eq 'BOB'
+          mapper.map(simple_row1)[:name].should eq 'FRED'
+          mapper.map(simple_row2).should be_nil
+          mapper.map(simple_row3).should be_nil
+        end
+
+        it "should handle chained conditionals" do
+          # If you actually do this, you're probably acting like an idiot, but I thought I should make sure it works
+          mapper = HashMapper.new(table) do |m|
+            m.if(->(row) { row[:field_one] }).if(->(row) { row[:field_two] }) do |i|
+              i.map(:name, :field_three) { |v| v.upcase }
+            end
+          end
+          # If you actually do this, you're probably acting like an idiot
+
+          mapper.map(simple_row0).should be_nil
+          mapper.map(simple_row1).should be_nil
+          mapper.map(simple_row2).should be_nil
+          mapper.map(simple_row3)[:name].should eq 'JANE'
+        end
+
+        it "look - you can put multiple expressions in the condition lambda" do
+          # If you actually do this, you're probably acting like an idiot, but I thought I should make sure it works
+          mapper = HashMapper.new(table) do |m|
+            m.if(->(row) { row[:field_one] && row[:field_two] }) do |i|
+              i.map(:name, :field_three) { |v| v.upcase }
+            end
+          end
+          # If you actually do this, you're probably acting like an idiot
+
+          mapper.map(simple_row0).should be_nil
+          mapper.map(simple_row1).should be_nil
+          mapper.map(simple_row2).should be_nil
+          mapper.map(simple_row3)[:name].should eq 'JANE'
+        end
+      end
+
+      describe "Mapping Row" do
+        it "should allow a field to be mapped from a row" do
+          mapper = HashMapper.new(table) do |m|
+            m.map(:title, ->(row){"#{row[:field_three].capitalize} the #{row[:field_two] ? 'Useful' : 'Useless'}"})
+          end
+
+          mapper.map(simple_row0)[:title].should eq 'Bob the Useless'
+          mapper.map(simple_row1)[:title].should eq 'Fred the Useful'
+          mapper.map(simple_row2)[:title].should eq 'Mary the Useless'
+          mapper.map(simple_row3)[:title].should eq 'Jane the Useful'
+
+        end
+
       end
 
 
+      describe "Complex Operations" do
+
+      end
     end
 
 
-    describe "ArrayOperations" do
+    describe "Complex Operations" do
 
       class FauxFormats < GoCart::Format
         def self.conditions
@@ -304,21 +393,21 @@ module GoCart
               end
             end
 
-            m.array(:conditions, include_empty: true) do |a|
-
-              FauxFormats.conditions.each do |c|
-                condition = "#{c}_condition".to_sym
-                a.map_object.unless(->(row) { row[condition].to_s.blank? }) do |obj|
-                  obj.map(:source, condition)
-                  obj.map(:rx_gaps, "#{c}_rx_gaps".to_sym)
-                  obj.map(:mpr, "#{c}_mpr".to_sym)
-                  obj.map(:csa, "#{c}_csa".to_sym)
-                  obj.map(:rx_untreated, "#{c}_rx_untreated".to_sym)
-                  obj.constant(:name, c)
-                end
-              end
-
-            end
+            #m.array(:conditions, include_empty: true) do |a|
+            #
+            #  FauxFormats.conditions.each do |c|
+            #    condition = "#{c}_condition".to_sym
+            #    a.map_object.unless(->(row) { row[condition].to_s.blank? }) do |obj|
+            #      obj.map(:source, condition)
+            #      obj.map(:rx_gaps, "#{c}_rx_gaps".to_sym)
+            #      obj.map(:mpr, "#{c}_mpr".to_sym)
+            #      obj.map(:csa, "#{c}_csa".to_sym)
+            #      obj.map(:rx_untreated, "#{c}_rx_untreated".to_sym)
+            #      obj.constant(:name, c)
+            #    end
+            #  end
+            #
+            #end
 
 
           end
@@ -343,4 +432,4 @@ end
 
 
 #TODO - Re-mapping a field that is not an array should raise an exception
-#TODO - Dump nil fields, but have option to force their inclusion
+#TODO - Fix Array operations, block and declaration
