@@ -28,3 +28,5 @@ require 'go_cart/target_file'
 require 'go_cart/loader/csv_loader'
 
 require 'go_cart/transform/hash_mapper'
+require 'go_cart/transform/hash_mapper_config'
+require 'go_cart/transform/special_maps'

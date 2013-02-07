@@ -93,8 +93,8 @@ module GoCart
 
       it "when empty block is supplied for configuration, all rows should map to empty hash" do
         new_mapper = HashMapper.new(table) {}
-        new_mapper.map(simple_row0).should be_empty
-        new_mapper.map(simple_row1).should be_empty
+        new_mapper.map(simple_row0).should be_nil
+        new_mapper.map(simple_row1, return_empty_objects: true).should be_empty
       end
 
       it "direct map all fields" do
@@ -152,6 +152,11 @@ module GoCart
         result[:field_four].should be_nil
         result[:ex_machina].should eq "ghost"
         result[:ex_politca].should eq "errors"
+      end
+
+      it "constant cannot be configured with both a value and a block" do
+        -> { HashMapper.new(simple_row1, table) { |m| m.constant(:ex_machina, "this is ") { "an error" } }
+        }.should raise_exception
       end
 
       it "perform operation and rename on field" do
@@ -221,7 +226,27 @@ module GoCart
         result[:sub2][:count].should eq 3
         result[:sub2][:present].should be_true
       end
+
+      describe "Conditional Operations" do
+        let(:mapper) do
+          HashMapper.new(table) do |m|
+            m.if(->(row) { row[:field_one] }) do |i|
+              i.map(:name, :field_three) {}
+            end
+          end
+        end
+
+        it "should conditionally map rows" do
+          mapper.map(simple_row0).should be_nil
+          mapper.map(simple_row1).should be_nil
+          mapper.map(simple_row2)[:name].should eq 'MARY'
+          mapper.map(simple_row3)[:name].should eq 'JANE'
+        end
+      end
+
+
     end
+
 
     describe "ArrayOperations" do
 
@@ -268,8 +293,9 @@ module GoCart
             m.map :member_id
 
             FauxFormats.conditions.each do |c|
+              condition = "#{c}_condition".to_sym
               m.map_object(:conditions, {array: true}) do |r|
-                r.map(:source, "#{c}_condition".to_sym)
+                r.map(:source, condition)
                 r.map(:rx_gaps, :"#{c}_rx_gaps".to_sym)
                 r.map(:mpr, :"#{c}_mpr".to_sym)
                 r.map(:csa, :"#{c}_csa".to_sym)
@@ -277,6 +303,24 @@ module GoCart
                 r.constant(:name, c)
               end
             end
+
+            m.array(:conditions, include_empty: true) do |a|
+
+              FauxFormats.conditions.each do |c|
+                condition = "#{c}_condition".to_sym
+                a.map_object.unless(->(row) { row[condition].to_s.blank? }) do |obj|
+                  obj.map(:source, condition)
+                  obj.map(:rx_gaps, "#{c}_rx_gaps".to_sym)
+                  obj.map(:mpr, "#{c}_mpr".to_sym)
+                  obj.map(:csa, "#{c}_csa".to_sym)
+                  obj.map(:rx_untreated, "#{c}_rx_untreated".to_sym)
+                  obj.constant(:name, c)
+                end
+              end
+
+            end
+
+
           end
         end
 
@@ -284,8 +328,9 @@ module GoCart
           result = mapper.map(CSV::Row.new(assessment_row_headers, assessment_row_data0))
           result[:member_id].should eq "A001"
           result[:conditions].should be_kind_of Array
-
-
+          result[:conditions][0][:name].should eq "congestive_heart_failure"
+          result[:conditions][1][:name].should eq "depression"
+          result[:conditions][2][:name].should eq "diabetes"
         end
       end
 
@@ -295,5 +340,7 @@ module GoCart
 end
 
 #TODO - Be able to skip mapping elements if the results are not meaningful
+
+
 #TODO - Re-mapping a field that is not an array should raise an exception
 #TODO - Dump nil fields, but have option to force their inclusion
