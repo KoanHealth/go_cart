@@ -99,7 +99,7 @@ module GoCart
 
       it "direct map all fields" do
         new_mapper = HashMapper.new(table) do |m|
-          m.simple_map_others
+          m.simple_map(%w{field_one field_two field_three field_four})
         end
 
         result = new_mapper.map(simple_row0)
@@ -139,10 +139,9 @@ module GoCart
         result[:field_four].should be_nil
       end
 
-      it "produce a constant" do
+      it "produce a constant, just supply a lambda and then ignore the row" do
         new_mapper = HashMapper.new(table) do |m|
-          m.constant(:ex_machina) { "ghost" }
-          m.constant(:ex_politca, "errors")
+          m.map :ex_machina, ->(row) { "ghost" }
         end
 
         result = new_mapper.map(simple_row1)
@@ -151,12 +150,6 @@ module GoCart
         result[:field_three].should be_nil
         result[:field_four].should be_nil
         result[:ex_machina].should eq "ghost"
-        result[:ex_politca].should eq "errors"
-      end
-
-      it "constant cannot be configured with both a value and a block" do
-        -> { HashMapper.new(simple_row1, table) { |m| m.constant(:ex_machina, "this is ") { "an error" } }
-        }.should raise_exception
       end
 
       it "perform operation and rename on field" do
@@ -172,7 +165,7 @@ module GoCart
       it "perform operation on field with simple_map_others" do
         new_mapper = HashMapper.new(table) do |m|
           m.map(:field_three) { |v| v.upcase.reverse }
-          m.simple_map_others
+          m.simple_map(%w{field_one field_two field_four})
         end
 
         result = new_mapper.map(simple_row1)
@@ -395,25 +388,6 @@ module GoCart
                 end
               end
             end
-
-
-            #m.array(:conditions, include_empty: true) do |a|
-            #
-            #  FauxFormats.conditions.each do |c|
-            #    condition = "#{c}_condition".to_sym
-            #    a.map_object.unless(->(row) { row[condition].to_s.blank? }) do |obj|
-            #      obj.map(:source, condition)
-            #      obj.map(:rx_gaps, "#{c}_rx_gaps".to_sym)
-            #      obj.map(:mpr, "#{c}_mpr".to_sym)
-            #      obj.map(:csa, "#{c}_csa".to_sym)
-            #      obj.map(:rx_untreated, "#{c}_rx_untreated".to_sym)
-            #      obj.constant(:name, c)
-            #    end
-            #  end
-            #
-            #end
-
-
           end
         end
 

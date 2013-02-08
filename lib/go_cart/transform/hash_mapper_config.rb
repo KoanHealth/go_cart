@@ -56,7 +56,7 @@ module GoCart
         end
 
         def map_object(&object_block)
-          o_map destination_symbol, object_block
+          o_map(destination_symbol, object_block)
         end
       end
       child_map.destination_symbol = destination_symbol
@@ -64,24 +64,9 @@ module GoCart
       array_map
     end
 
-    def constant(destination_symbol, value = nil, &map_block)
-      raise "constant requires a value or a block (but not both" unless value.nil? ^ map_block.nil?
-
-      if (value)
-        transform_map[destination_symbol] = ->(row) { value }
-      else
-        transform_map[destination_symbol] = ->(row) { map_block.call }
-      end
-    end
-
-    # Equivalent of calling simple_map with all of the symbols for which you haven't already specified a mapping
-    def simple_map_others
-      raw_transform_map.keys.each { |s| transform_map[s] = raw_transform_map[s] unless transform_map[s] }
-    end
-
     # Pass a list of symbols that should be directly mapped (key, type, and value)from the input to the root level of the output
     def simple_map(*fields)
-      fields.map(&:to_sym).each { |s| transform_map[s] = raw_transform_map[s] }
+      fields.flatten.map {|f| f.to_sym }.each { |s| transform_map[s] = raw_transform_map[s] }
     end
 
     def if(condition, &condition_block)
