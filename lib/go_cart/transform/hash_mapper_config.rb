@@ -52,7 +52,11 @@ module GoCart
         alias :o_map_object :map_object
 
         def map(source = nil, &transform_block)
-          o_map(destination_symbol, source) &transform_block
+          if transform_block
+            o_map(destination_symbol, source, &transform_block)
+          else
+            o_map(destination_symbol, source)
+          end
         end
 
         def map_object(&object_block)
@@ -66,7 +70,7 @@ module GoCart
 
     # Pass a list of symbols that should be directly mapped (key, type, and value)from the input to the root level of the output
     def simple_map(*fields)
-      fields.flatten.map {|f| f.to_sym }.each { |s| transform_map[s] = raw_transform_map[s] }
+      fields.flatten.map(&:to_sym).each { |s| transform_map[s] = raw_transform_map[s] }
     end
 
     def if(condition, &condition_block)

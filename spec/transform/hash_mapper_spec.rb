@@ -321,10 +321,50 @@ module GoCart
 
       end
 
+      describe "Array Operations" do
+        it "Should be able to gather items into an array" do
+          new_mapper = HashMapper.new(table) do |m|
+            m.array(:junk_drawer) do |a|
+              a.map(:field_one)
+              a.map(:field_two)
+              a.map(:field_three) { |v| v.upcase }
+              a.map(:field_four)
+            end
+          end
 
-      describe "Complex Operations" do
+          result = new_mapper.map(simple_row0)
+          result.length.should eq 1
+          result[:junk_drawer].should be
+          result[:junk_drawer].is_a?(Array).should be_true
+          result[:junk_drawer].length.should eq 4
+          result[:junk_drawer].should include 'BOB'
+          result[:junk_drawer].should include false
+          result[:junk_drawer].should include 0
+        end
 
+
+        it "Should be able to gather items into an array - without using the block" do
+          # not entirely sure why you would do this, but it is allowed
+          new_mapper = HashMapper.new(table) do |m|
+            m.array(:junk_drawer)
+            m.map(:junk_drawer, :field_one)
+            m.map(:junk_drawer, :field_two)
+            m.map(:junk_drawer, :field_three) { |v| v.upcase }
+            m.map(:junk_drawer, :field_four)
+          end
+
+          result = new_mapper.map(simple_row0)
+          result.length.should eq 1
+          result[:junk_drawer].should be
+          result[:junk_drawer].is_a?(Array).should be_true
+          result[:junk_drawer].length.should eq 4
+          result[:junk_drawer].should include 'BOB'
+          result[:junk_drawer].should include false
+          result[:junk_drawer].should include 0
+        end
       end
+
+
     end
 
 
@@ -404,8 +444,4 @@ module GoCart
   end
 end
 
-#TODO - Be able to skip mapping elements if the results are not meaningful
-
-
 #TODO - Re-mapping a field that is not an array should raise an exception
-#TODO - Fix Array operations, block and declaration
