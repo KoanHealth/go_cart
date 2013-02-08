@@ -15,8 +15,12 @@ module GoCart
       end
 
       def [](header_or_index)
-        header_or_index.is_a?(Integer) ?
-            raw_row[header_or_index] : @raw_map[header_or_index.to_sym].call(raw_row)
+        if header_or_index.is_a?(Integer)
+          raw_row[header_or_index]
+        else
+          proc = @raw_map[header_or_index.to_sym]
+          proc.nil? ? nil : proc.call(raw_row)
+        end
       end
 
       private
@@ -26,6 +30,7 @@ module GoCart
         @raw_row = raw_row
         @raw_map = raw_map
       end
+
     end
 
     def initialize(*args, &config_block)
@@ -87,7 +92,7 @@ module GoCart
     def initialize_with_format_table(row, format_table, config_block)
       @raw_transform_map = @transform_map = {}
       format_table.fields.each do |key, value|
-        index = row.index(value.header)
+        index = row.index(value.header.to_sym)
         type = value.type
         #TODO - are there faster conversion routes, particularly for boolean values?
         transform_map[key] = ->(r) { DataUtils.extract_value(type, r[index]) }
@@ -109,6 +114,7 @@ module GoCart
       @transform_map = {}
       config_block.call(HashMapperConfig.new(self))
     end
+
   end
 
 end
