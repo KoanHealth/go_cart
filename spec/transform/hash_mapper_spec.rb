@@ -200,63 +200,6 @@ module GoCart
 
       end
 
-      it "splitting a row to a sub hash should be possible in a block" do
-
-        new_mapper = HashMapper.new(table) do |m|
-          m.map_object(:sub1) do |r|
-            r.map(:name, :field_three) { |v| v.upcase }
-            r.map(:useful, :field_one)
-          end
-          m.map_object(:sub2) do |r|
-            r.map(:present, :field_two)
-            r.map(:count, :field_four)
-          end
-        end
-
-        row = CSV::Row.new(simple_row_headers, [true, true, "dick", 3].map(&:to_s))
-
-        result = new_mapper.map(row)
-        result.count.should eq 2
-        result[:sub1].count.should eq 2
-        result[:sub2].count.should eq 2
-
-        result[:sub1][:name].should eq "DICK"
-        result[:sub1][:useful].should be_true
-
-        result[:sub2][:count].should eq 3
-        result[:sub2][:present].should be_true
-      end
-
-      it "a better syntax for splitting a row" do
-        new_mapper = HashMapper.new(table) do |m|
-          m.map :sub1, ->(r) do
-            {
-                name: r[:field_three].upcase,
-                useful: r[:field_one]
-            }
-          end
-          m.map :sub2, ->(r) do
-            {
-                present: r[:field_two],
-                count: r[:field_four]
-            }
-          end
-        end
-
-        row = CSV::Row.new(simple_row_headers, [true, true, "dick", 3].map(&:to_s))
-
-        result = new_mapper.map(row)
-        result.count.should eq 2
-        result[:sub1].count.should eq 2
-        result[:sub2].count.should eq 2
-
-        result[:sub1][:name].should eq "DICK"
-        result[:sub1][:useful].should be_true
-
-        result[:sub2][:count].should eq 3
-        result[:sub2][:present].should be_true
-      end
-
       describe "Conditional Operations" do
         it "should conditionally map rows" do
           mapper = HashMapper.new(table) do |m|
@@ -315,10 +258,10 @@ module GoCart
         end
       end
 
-      describe "Mapping Row" do
+      describe "Mapping Rows" do
         it "should allow a field to be mapped from a row" do
           mapper = HashMapper.new(table) do |m|
-            m.map(:title, ->(row){"#{row[:field_three].capitalize} the #{row[:field_two] ? 'Useful' : 'Useless'}"})
+            m.map(:title, ->(row) { "#{row[:field_three].capitalize} the #{row[:field_two] ? 'Useful' : 'Useless'}" })
           end
 
           mapper.map(simple_row0)[:title].should eq 'Bob the Useless'
@@ -326,6 +269,61 @@ module GoCart
           mapper.map(simple_row2)[:title].should eq 'Mary the Useless'
           mapper.map(simple_row3)[:title].should eq 'Jane the Useful'
 
+        end
+
+        it "Row mapping can also be used to produce sub objects" do
+          new_mapper = HashMapper.new(table) do |m|
+            m.map :sub1, ->(r) do
+              {
+                  name: r[:field_three].upcase,
+                  useful: r[:field_one]
+              }
+            end
+            m.map :sub2, ->(r) do
+              {
+                  present: r[:field_two],
+                  count: r[:field_four]
+              }
+            end
+          end
+
+          row = CSV::Row.new(simple_row_headers, [true, true, "dick", 3].map(&:to_s))
+
+          result = new_mapper.map(row)
+          result.count.should eq 2
+          result[:sub1].count.should eq 2
+          result[:sub2].count.should eq 2
+
+          result[:sub1][:name].should eq "DICK"
+          result[:sub1][:useful].should be_true
+
+          result[:sub2][:count].should eq 3
+          result[:sub2][:present].should be_true
+        end
+
+        it "splitting a row to a sub hash should be possible in a block" do
+
+          new_mapper = HashMapper.new(table) do |m|
+            m.map_object(:sub1) do |row|
+              {name: row[:field_three].upcase, useful: row[:field_one]}
+            end
+            m.map_object(:sub2) do |row|
+              {present: row[:field_two], count: row[:field_four]}
+            end
+          end
+
+          row = CSV::Row.new(simple_row_headers, [true, true, "dick", 3].map(&:to_s))
+
+          result = new_mapper.map(row)
+          result.count.should eq 2
+          result[:sub1].count.should eq 2
+          result[:sub2].count.should eq 2
+
+          result[:sub1][:name].should eq "DICK"
+          result[:sub1][:useful].should be_true
+
+          result[:sub2][:count].should eq 3
+          result[:sub2][:present].should be_true
         end
 
       end
@@ -380,18 +378,24 @@ module GoCart
         let(:mapper) do
           HashMapper.new(assessment_table) do |m|
             m.map :member_id
-
-            FauxFormats.conditions.each do |c|
-              condition = "#{c}_condition".to_sym
-              m.map_object(:conditions, {array: true}) do |r|
-                r.map(:source, condition)
-                r.map(:rx_gaps, :"#{c}_rx_gaps".to_sym)
-                r.map(:mpr, :"#{c}_mpr".to_sym)
-                r.map(:csa, :"#{c}_csa".to_sym)
-                r.map(:rx_untreated, :"#{c}_rx_untreated".to_sym)
-                r.constant(:name, c)
+            m.array(:conditions, include_empty: true) do |a|
+              FauxFormats.conditions.each do |c|
+                a.map_object do |row|
+                  source = row["#{c}_condition"]
+                  unless source.to_s.blank?
+                    {
+                        name: c,
+                        source: source,
+                        rx_gaps: row["#{c}_rx_gaps"],
+                        mpr: row["#{c}_mpr"],
+                        csa: row["#{c}_csa"],
+                        rx_untreated: row["#{c}_rx_untreated"]
+                    }
+                  end
+                end
               end
             end
+
 
             #m.array(:conditions, include_empty: true) do |a|
             #
@@ -417,13 +421,11 @@ module GoCart
           result = mapper.map(CSV::Row.new(assessment_row_headers, assessment_row_data0))
           result[:member_id].should eq "A001"
           result[:conditions].should be_kind_of Array
+          result[:conditions].length.should eq 2
           result[:conditions][0][:name].should eq "congestive_heart_failure"
-          result[:conditions][1][:name].should eq "depression"
-          result[:conditions][2][:name].should eq "diabetes"
+          result[:conditions][1][:name].should eq "diabetes"
         end
       end
-
-
     end
   end
 end

@@ -15,7 +15,8 @@ module GoCart
       end
 
       def [](header_or_index)
-        header_or_index.is_a?(Integer) ? raw_row[header_or_index] : @raw_map[header_or_index].call(raw_row)
+        header_or_index.is_a?(Integer) ?
+            raw_row[header_or_index] : @raw_map[header_or_index.to_sym].call(raw_row)
       end
 
       private

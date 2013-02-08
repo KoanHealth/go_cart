@@ -13,6 +13,7 @@ module GoCart
     #
     # In all cases, the transform block will be called if supplied
     def map(destination_symbol, source = nil, &transform_block)
+
       source = destination_symbol if source.nil?
       source = source.to_sym if source.is_a? String
       if source.is_a? Symbol
@@ -23,25 +24,44 @@ module GoCart
 
       raise "Invalid source specified" unless source.is_a? Proc
 
-      if transform_block
-        transform_map[destination_symbol] = guarded(->(row) { transform_block.call(source.call(row)) })
+      value = transform_block.nil? ?
+          guarded(source) :
+          guarded(->(row) { transform_block.call(source.call(row)) })
+
+      if transform_map[destination_symbol].respond_to? :append_mapping
+        transform_map[destination_symbol].append_mapping value
       else
-        transform_map[destination_symbol] = guarded(source)
+        raise "#{destination_symbol} appears to have been mapped multiple times, but it is not an array" unless transform_map[destination_symbol].nil?
+        transform_map[destination_symbol] = value
       end
     end
 
-    def map_object(destination_symbol, options = {}, &map_block)
-      raise "map_object requires a block" unless map_block
-      child_map = HashMapper.new(self, &map_block)
-      unless options[:array]
-        transform_map[destination_symbol] = guarded(child_map)
-      else
-        current_array = transform_map[destination_symbol]
-        unless current_array.respond_to? :append_mapping
-          transform_map[destination_symbol] = current_array = ArrayMap.new
+    def map_object(destination_symbol, &object_block)
+      map(destination_symbol, object_block)
+    end
+
+    def array(destination_symbol, options = {}, &array_block)
+      raise "#{destination_symbol} appears to have been mapped multiple times" unless transform_map[destination_symbol].nil?
+
+      transform_map[destination_symbol] = array_map = ArrayMap.new(options)
+      child_map = HashMapperConfig.new(self, conditions)
+
+      class << child_map
+        attr_accessor :destination_symbol
+        alias :o_map :map
+        alias :o_map_object :map_object
+
+        def map(source = nil, &transform_block)
+          o_map(destination_symbol, source) &transform_block
         end
-        current_array.append_mapping(child_map)
+
+        def map_object(&object_block)
+          o_map destination_symbol, object_block
+        end
       end
+      child_map.destination_symbol = destination_symbol
+      array_block.call(child_map) if array_block
+      array_map
     end
 
     def constant(destination_symbol, value = nil, &map_block)
@@ -61,7 +81,7 @@ module GoCart
 
     # Pass a list of symbols that should be directly mapped (key, type, and value)from the input to the root level of the output
     def simple_map(*fields)
-      fields.each { |s| transform_map[s] = raw_transform_map[s] }
+      fields.map(&:to_sym).each { |s| transform_map[s] = raw_transform_map[s] }
     end
 
     def if(condition, &condition_block)
@@ -71,7 +91,7 @@ module GoCart
     end
 
     def unless(condition, &condition_block)
-      self.if(->(row) {!condition.call(row)}, &condition_block)
+      self.if(->(row) { !condition.call(row) }, &condition_block)
     end
 
     private
@@ -79,7 +99,7 @@ module GoCart
 
     def guarded(source)
       return source if conditions.empty?
-      ->(row) { conditions.any? {|c| !c.call(row)} ? nil : source.call(row)}
+      ->(row) { conditions.any? { |c| !c.call(row) } ? nil : source.call(row) }
     end
 
     def transform_map
