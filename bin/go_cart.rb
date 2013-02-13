@@ -42,6 +42,7 @@ private
 		opts.separator "COMMANDS:"
 		opts.separator "\tGEN - Generate a format file from a data file or schema file"
 		opts.separator "\tRUN - Insert data into a database using the specified format"
+		opts.separator "\tSQL - Generate SQL code to map from one table to another table"
 
 		GoCart::GoCartDef.new.abort_err message, opts
 	end

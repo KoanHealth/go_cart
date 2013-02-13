@@ -72,9 +72,9 @@ class DataUtils
 				m = parts[order[1]].to_i
 				d = parts[order[2]].to_i
 
-				next if y < 1800 || y > 3000
 				next if m < 1 || m > 12
 				next if d < 1 || d > 31
+				next if y < 1800 || y > 9999
 				value = "#{y}-#{"%02d"%m}-#{"%02d"%d}"
 				break
 			end
