@@ -1,0 +1,9 @@
+## Format: Tester
+## Table: Tester Claim
+## Fields: Name, Start, Length, Type
+﻿Paid Century/Year/Month,1,6,string
+Product ID,7,2,string
+Client ID,9,2,string
+Product ID,7,2,string
+Record ID,11,2,string
+Group ID,13,8,string

@@ -23,6 +23,8 @@ protected
 	SCHEMA_FIELDS = [ 'symbol', 'type', 'limit', 'null', 'default', 'precision', 'scale' ]
 	ALLOWED_FIELDS = FORMAT_FIELDS | SCHEMA_FIELDS | [ 'ignore' ]
 
+  attr_reader :module_name, :current_format, :current_schema, :current_format_table, :current_schema_table
+
 	def define_module(name)
 		@module_name = TypeUtils.to_class_name(name)
 	end

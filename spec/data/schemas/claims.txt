@@ -1,0 +1,142 @@
+## Format: Tester
+## Module: Tester_Claim
+## Table: Tester Claim
+## Fields: Name, Start, End, Type
+﻿Paid Century/Year/Month,1,6,string
+Product ID,7,8,string
+Client ID,9,10,string
+Record ID,11,12,string
+Group ID,13,20,string
+Subscriber ID,21,29,string
+Patient Relationship,30,30,string
+Patient ID Name,31,36,string
+System ID,37,37,string
+Claim ID,38,48,string
+Line Number,49,50,string
+Last Update Date,51,58,date
+Claim Status,59,60,string
+Eligibility Plan ID,61,66,string
+Claim Coverage Code,67,68,string
+Processing ID,69,70,string
+Eligibility Event,71,71,string
+Eligibility Coverage Code,72,73,string
+COBRA Indicator,74,74,string
+Primary Care Physician ID,75,86,string
+Preferred Provider ID,87,98,string
+Preferred Provider Prefix,99,102,string
+Subscriber Name,103,132,string
+Subscriber Date of Birth,133,140,date
+Subscriber Address 1,141,170,string
+Subscriber Address 2,171,200,string
+Subscriber Address 3,201,230,string
+Subscriber City,231,249,string
+Subscriber State,250,251,string
+Subscriber Zip Code,252,262,string
+Patient Account Number,263,282,string
+Patient SSN,313,321,string
+Patient Age,330,332,string
+Patient Sex Code,333,333,string
+Subscriber Type,334,337,string
+HealthAxis Level 3/Level 2 Coverage Sets,338,344,string
+Network  Indicator,345,345,string
+Subscriber Location,346,353,string
+Subgroup,354,368,string
+Work Category,369,371,string
+HealthAxis Dep Sequence Number,372,373,string
+Received Date,375,382,date
+Input Date,383,390,date
+Paid Date,391,398,date
+Override Date,399,406,date
+COB Type,407,407,string
+COB Savings,408,418,decimal
+Accident Type,419,419,string
+Accident Date,420,427,date
+Total Charges,428,438,decimal
+Check Status,439,440,string
+Check Action Date,441,448,date
+Check Payee,449,449,string
+Payee ID,450,465,string
+Payee Name,466,505,string
+Check # ,506,513,string
+Check Segment Amount,514,524,decimal
+Alternate Coverage Indicator,525,525,string
+Total Line-Item Count,526,528,string
+Admitting Physician,529,540,string
+Admitting Physician Name,541,570,string
+Procedure ID 1,571,577,string
+Procedure ID 2,578,584,string
+Procedure ID 3,585,591,string
+Diagnosis Code 1,592,597,string
+Diagnosis Code 2,598,603,string
+Diagnosis Code 3,604,609,string
+Diagnosis Code 4,610,615,string
+Diagnosis Code 5,616,621,string
+Pre-authorization Days,622,624,string
+Discharge Status,625,626,string
+Discharge Status Type,627,629,string
+DRG Code,630,634,string
+Hospital Bill Type,635,635,string
+Admission Date,636,643,date
+Discharge Date,644,651,date
+Service Begin Date,652,659,date
+Service End Date,660,667,date
+Type of Service,668,670,string
+Type of Service Description,671,710,string
+Place of Service,711,712,string
+Revenue Code,713,716,string
+Provider of Service,717,728,string
+Provider of Service SSN,729,737,string
+Provider of Service Tax ID,738,746,string
+Provider of Service Name,747,776,string
+Provider of Service Addr. 1,777,806,string
+Provider of Service Addr. 2,807,836,string
+Provider of Service Addr. 3,837,866,string
+Provider of Service City,867,885,string
+Provider of Service State,886,887,string
+Provider of Service Zip Code,888,898,string
+Provider of Service Type,899,899,string
+Room Type,900,901,string
+Line-item Procedure ID,902,908,string
+Line-item Diagnosis Code,909,914,string
+Explanation Code,915,917,string
+Explanation Code Description,918,957,string
+Override Code,958,960,string
+Override Code Description,961,1000,string
+Override Exclude Amount,1001,1011,decimal
+Charged Amount,1012,1022,decimal
+Considered Charges,1023,1033,decimal
+# of Services/# of Days,1034,1036,string
+Disallowed Amount,1037,1047,decimal
+User-exit Disallowed Amount,1048,1058,decimal
+User-exit Disallowed Expl.,1059,1061,string
+User-exit Amount,1062,1072,decimal
+User-exit Amount Expl.,1073,1075,string
+Line-item Check Amount,1076,1086,decimal
+Allowed Amount,1087,1097,decimal
+Deductible Amount,1098,1108,decimal
+Copay Amount,1109,1119,decimal
+COB Adjustment Amount,1120,1130,decimal
+Paid Amount,1131,1141,decimal
+Provider of Service Provider Type,1142,1145,string
+Provider of Service Provider Specialty,1146,1149,string
+Applied to Overpayment Amount,115,0,string
+Letter Code ID1,1162,1163,string
+Letter Code ID2,1164,1165,string
+Letter Code ID3,1166,1167,string
+Rule,1168,1170,string
+PPO Discount Amount,117,1,string
+Excess Amount,118,2,string
+Transfer Offset Amount,1193,1203,decimal
+Over Plan Maximum Amount,1204,1214,decimal
+Medicare Discount Amount,1215,1225,decimal
+PPO Allowable Amount,1226,1236,decimal
+Deductible Copay Amount,1237,1247,decimal
+Healthaxis Practitioner ID,1305,1315,string
+Healthaxis Vendor ID,1316,1326,string
+Claim-Level Copay Amount,1327,1337,decimal
+Transfer From Transaction ID,1338,1348,string
+Draft/EOB Comments,1349,1360,string
+User/Analyst Orig.,1361,1370,string
+User/Analyst Pend,1371,1380,string
+User/Analyst Accept,1381,1390,string
+User/Analyst Release,1391,1400,string

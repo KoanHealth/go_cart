@@ -2,6 +2,7 @@ module GoCart
 class GeneratorFromSchema < Generator
 
 	def generate(schema_file, format_file = nil, options = {})
+    fail "Schema file is required" if schema_file.blank?
 		from_schema_file schema_file
 
 		writer = FormatFileWriter.new @template_directory
