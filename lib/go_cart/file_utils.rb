@@ -49,6 +49,8 @@ class FileUtils
 		options = Hash.new
 		if !separator_info.nil? && separator_info[1] >= samples
 			options[:col_sep] = separator_info[0]
+			# Files that are not comma separated tend not to use quotes
+			options[:quote_char] = options[:col_sep] if options[:col_sep] != ','
 			if has_header
 				options[:headers] = true
 				options[:return_headers] = true
