@@ -48,9 +48,10 @@ class DataUtils
 
 	def self.extract_date(value)
 		# Null/Empty
-		return nil if value == '00000000' || value =~ /^00\W00\W0000$/ || value =~ /^0000\W00\W00$/
-		return nil if value == '99999999' || value =~ /^99\W99\W9999$/ || value =~ /^9999\W99\W99$/
+		return nil if value == '00000000' || value =~ /^\d\d\W\d\d\W0000$/ || value =~ /^0000\W\d\d\W\d\d$/
+		return nil if value == '99999999' || value =~ /^\d\d\W\d\d\W9999$/ || value =~ /^9999\W\d\d\W\d\d$/
 
+		# Remove time if present
 		if value =~ /^(.+)\s+\d{1,2}:\d{2}:\d{2}/
 			value = $1
 		end
