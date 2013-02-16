@@ -76,26 +76,32 @@ end
 
 class FormatField < CommonField
 
-	attr_accessor :header, :index, :start, :end, :length, :name, :description
+  attr_accessor :index, :header, :name, :description
+	attr_reader :start, :end, :length
+
+  def initialize(symbol, type, options = {})
+    super
+    @length ||= (@end - @start) + 1 if @start && @end
+  end
 
 	def get_raw_value(line)
-		return line[@start-1, @length]
+    line[@start-1, @length]
 	end
 
 	def extract_value(value)
-		return DataUtils.extract_value(@type, value)
+    DataUtils.extract_value(@type, value)
 	end
 
 	def get_parameters()
 		s = "#{@symbol.inspect}"
-		s += ", :header => #{@header.inspect}" unless @header.nil?
-		s += ", :index => #{@index}" unless @index.nil?
-		s += ", :start => #{@start}" unless @start.nil?
-		s += ", :end => #{@end}" unless @end.nil?
-		s += ", :length => #{@length}" unless @length.nil?
-		s += ", :name => #{@name.inspect}" unless @name.nil?
-		s += ", :description => #{@description.inspect}" unless @description.nil?
-		return s
+		s << ", :header => #{@header.inspect}" unless @header.nil?
+		s << ", :index => #{@index}" unless @index.nil?
+		s << ", :start => #{@start}" unless @start.nil?
+		s << ", :end => #{@end}" unless @end.nil?
+		s << ", :length => #{@length}" unless @length.nil?
+		s << ", :name => #{@name.inspect}" unless @name.nil?
+		s << ", :description => #{@description.inspect}" unless @description.nil?
+    s
 	end
 
 end
