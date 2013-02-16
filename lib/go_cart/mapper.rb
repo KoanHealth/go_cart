@@ -89,23 +89,27 @@ class Mapping
 	def map_fields(raw_values)
 		field_data = []
 		schema_table.fields.each do |symbol, schema_field|
-			info = maps[schema_field.symbol]
-			field_data << nil if info.nil?
+      begin
+        info = maps[schema_field.symbol]
+        field_data << nil if info.nil?
 
-			value = nil
-			case info[:type]
-			when :symbol
-				format_field = format_table.fields[info[:symbol]]
-				value = format_field.extract_value(raw_values[symbol])
-			when :function
-				value = info[:function].call(raw_values, symbol)
-			else
-				value = info[:value]
-			end
-			value = info[:translator].call(value) if info[:translator]
-			field_data << value
+        value = nil
+        case info[:type]
+        when :symbol
+          format_field = format_table.fields[info[:symbol]]
+          value = format_field.extract_value(raw_values[symbol])
+        when :function
+          value = info[:function].call(raw_values, symbol)
+        else
+          value = info[:value]
+        end
+        value = info[:translator].call(value) if info[:translator]
+        field_data << value
+      rescue Exception => e
+        raise GoCart::Errors::MappingError.new(schema_field, e)
+      end
 		end
-		return field_data
+    field_data
 	end
 
 end

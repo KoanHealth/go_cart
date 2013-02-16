@@ -21,8 +21,12 @@ class LoaderFromFixed < Loader
 				format_table.fields.each do |symbol, field|
 					raw_values[symbol] = field.get_raw_value(line)
 				end
-				
-				field_data = mapping.map_fields(raw_values)
+
+        begin
+				  field_data = mapping.map_fields(raw_values)
+        rescue Exception => e
+          raise GoCart::Errors::LoaderError.new(file, line_number, e)
+        end
 				target.emit field_data unless field_data.nil?
 			end
 		ensure
