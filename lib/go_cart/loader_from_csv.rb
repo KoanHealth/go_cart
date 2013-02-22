@@ -11,9 +11,11 @@ class LoaderFromCsv < Loader
 
 			symbol_map = {}
 			raw_values = {}
+      line_number = 0
 			options = FileUtils.get_csv_options(file)
 			CSV.foreach(file, options) do |row|
 				raw_values.clear
+        line_number += 1
 				if options[:headers]
 					if row.header_row?
 						row.each do |raw_symbol, header|
@@ -42,8 +44,12 @@ class LoaderFromCsv < Loader
 						raw_values[field.symbol] = raw_value
 					end
 				end
-				
-				field_data = mapping.map_fields(raw_values)
+
+        begin
+				  field_data = mapping.map_fields(raw_values)
+        rescue Exception => e
+          raise GoCart::Errors::LoaderError.new(file, line_number, e)
+        end
 				target.emit field_data unless field_data.nil?
 			end
 		ensure
