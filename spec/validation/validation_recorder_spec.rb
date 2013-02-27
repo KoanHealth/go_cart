@@ -11,7 +11,7 @@ module GoCart
           t.boolean :two, header: :two
           t.string :three, header: :three, :validation => :required_field
           t.integer :four, header: :four
-          t.string :five, header: :five, :validation => :required_field
+          t.string :five, header: :five, :validation => RegexValidator.new(/^rose(bud)?$/, 'your flower stinks')
         end
       end
     end
@@ -42,10 +42,10 @@ module GoCart
     describe 'When presented with invalid data' do
       let(:data) do
         [
-            {one: false, two: false, three: nil, four: 1, five: 'rosebud'},
+            {one: false, two: false, three: nil, four: 1, five: 'daisy'},
             {one: false, two: true, three: 'fred', four: 2, five: nil},
             {one: true, two: false, three: 'mary', four: 3, five: 'rosebud'},
-            {one: true, two: true, three: 'jane', four: 4, five: 'rosebud'},
+            {one: true, two: true, three: 'jane', four: 4, five: 'rose'},
         ]
       end
       before do
@@ -60,11 +60,17 @@ module GoCart
         recorder.has_errors?.should be_true
       end
 
-      it 'should report two errors encountered' do
-        recorder.total_errors.should eq 2
-
+      it 'should report three errors encountered' do
+        recorder.total_errors.should eq 3
       end
 
+      it 'should report two errors on field five' do
+        recorder.errors_for(:five).count.should eq 2
+      end
+
+      it 'should report one error on field three' do
+        recorder.errors_for(:three).count.should eq 1
+      end
     end
 
   end

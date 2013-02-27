@@ -24,6 +24,10 @@ module GoCart
       errors.count
     end
 
+    def errors_for(field)
+      errors.select {|e| e.field == field}
+    end
+
     private
     def validate_value(tuple, symbol, value)
       get_validators(symbol).each do |v|
@@ -39,9 +43,7 @@ module GoCart
           next unless v
           case v
             when Symbol
-              ValidatorRegistrar.get_validator(symbol, v)
-            when Proc
-              v.call
+              Validator.get(symbol, v)
             else
               v.clone
           end
@@ -57,7 +59,5 @@ module GoCart
     def errors
       @errors ||= []
     end
-
-
   end
 end
