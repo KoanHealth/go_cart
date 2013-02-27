@@ -2,8 +2,8 @@ module GoCart
 
 class RequiredFieldValidator < Validator
 
-  def validate(tuple, symbol, value)
-    failed(symbol, value, 'value was not present') if value.to_s.empty?
+  def validate(input)
+    failed(input, 'value was not present') if input.value.to_s.empty?
   end
 end
 end

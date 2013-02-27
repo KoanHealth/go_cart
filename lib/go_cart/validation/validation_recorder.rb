@@ -11,8 +11,13 @@ module GoCart
       @rows_processed = 0
     end
 
-    def validate(tuple)
-      tuple.each { |symbol, value| validate_value(tuple, symbol, value) }
+    def validate(line_number, tuple)
+      input = Validator::Input.new(line_number, tuple)
+      tuple.each do |symbol, value|
+        input.field = symbol
+        input.value = value
+        validate_value(input)
+      end
       @rows_processed += 1
     end
 
@@ -28,10 +33,16 @@ module GoCart
       errors.select {|e| e.field == field}
     end
 
+    def rows_with_errors
+      error_count = Hash.new(0)
+      errors.each { |e| error_count[e.line_number] += 1 }
+      error_count.count
+    end
+
     private
-    def validate_value(tuple, symbol, value)
-      get_validators(symbol).each do |v|
-        result = v.validate(tuple, symbol, value)
+    def validate_value(input)
+      get_validators(input.field).each do |v|
+        result = v.validate(input)
         errors.push result if result
       end
     end

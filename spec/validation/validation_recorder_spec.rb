@@ -18,6 +18,7 @@ module GoCart
 
     let(:recorder) { recorder = ValidationRecorder.new(SimpleFormat.new.get_table(:simple_format)) }
 
+
     describe 'When presented with valid data' do
       let(:data) do
         [
@@ -28,13 +29,16 @@ module GoCart
         ]
       end
 
+      before do
+        line_number = 0
+        data.each { |tuple| recorder.validate(line_number += 1, tuple) }
+      end
+
       it 'should report no validation issues' do
-        data.each { |tuple| recorder.validate(tuple) }
         recorder.has_errors?.should be_false
       end
 
       it 'should report four rows processed' do
-        data.each { |tuple| recorder.validate(tuple) }
         recorder.rows_processed.should eq 4
       end
     end
@@ -49,7 +53,8 @@ module GoCart
         ]
       end
       before do
-        data.each { |tuple| recorder.validate(tuple) }
+        line_number = 0
+        data.each { |tuple| recorder.validate(line_number += 1, tuple) }
       end
 
       it 'should report four rows processed' do
@@ -70,6 +75,10 @@ module GoCart
 
       it 'should report one error on field three' do
         recorder.errors_for(:three).count.should eq 1
+      end
+
+      it 'should report two rows with errors' do
+        recorder.rows_with_errors.should eq 2
       end
     end
 

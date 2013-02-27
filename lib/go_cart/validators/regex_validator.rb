@@ -11,8 +11,8 @@ module GoCart
       @message || 'Did not match expected pattern'
     end
 
-    def validate(tuple, symbol, value)
-      failed(symbol, value, message) unless @expression =~ value
+    def validate(input)
+      failed(input, message) unless @expression =~ input.value
     end
   end
 end
