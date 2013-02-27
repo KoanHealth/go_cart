@@ -20,6 +20,12 @@ require 'go_cart/loader'
 require 'go_cart/loader_from_csv'
 require 'go_cart/loader_from_fixed'
 
+require 'go_cart/validation/validator'
+require 'go_cart/validation/group_validator'
+require 'go_cart/validation/validation_recorder'
+require 'go_cart/validators/required_field_validator'
+require 'go_cart/validators/regex_validator'
+
 require 'go_cart/target'
 require 'go_cart/target_db'
 require 'go_cart/target_file'

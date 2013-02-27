@@ -3,7 +3,7 @@ require 'spec_helper'
 module GoCart
 
   describe ValidationRecorder do
-    class SimpleFormat < GoCart::Format
+    class ValidationRecorderFormat < GoCart::Format
       def initialize
         super
         create_table :simple_format, :headers => true, :name => 'simple_format' do |t|
@@ -16,7 +16,7 @@ module GoCart
       end
     end
 
-    let(:recorder) { recorder = ValidationRecorder.new(SimpleFormat.new.get_table(:simple_format)) }
+    let(:recorder) { recorder = ValidationRecorder.new(ValidationRecorderFormat.new.get_table(:simple_format)) }
 
 
     describe 'When presented with valid data' do

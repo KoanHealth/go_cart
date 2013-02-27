@@ -7,7 +7,7 @@ module GoCart
 
     def lookup_codes(code_array)
       self.call_count += 1
-      code_array.select { |c| valid_codes.find(c) }
+      code_array.select { |c| valid_codes.any? { |v| v == c } }
     end
 
     def reset_call_count
@@ -16,15 +16,11 @@ module GoCart
   end
 
   class FakeGroupLambdaValidator < Validator
-    validate_group 500, ->(values) {StubCodeLookup.lookup_codes(values)}
-
-    def self.validate_unique_codes(values)
-      StubCodeLookup.lookup_codes(values)
-    end
+    validate_group 10, ->(values) { StubCodeLookup.lookup_codes(values) }
   end
 
   class FakeGroupClassFunctionValidator < Validator
-    validate_group 500, :validate_unique_codes
+    validate_group 10, :validate_unique_codes
 
     def self.validate_unique_codes(values)
       StubCodeLookup.lookup_codes(values)
@@ -58,7 +54,7 @@ module GoCart
     let(:recorder_class) { ValidationRecorder.new(GroupedSimpleFormat.new.get_table(:simple_format_class)) }
 
     describe "with valid input (lambda)" do
-      let(:recorder) {recorder_lambda}
+      let(:recorder) { recorder_lambda }
       before do
         100.times do |v|
           recorder.validate(v, {one: true, two: true, three: 'moe'})
@@ -81,7 +77,7 @@ module GoCart
     end
 
     describe "with valid input (class)" do
-      let(:recorder) {recorder_class}
+      let(:recorder) { recorder_class }
       before do
         100.times do |v|
           recorder.validate(v, {one: true, two: true, three: 'moe'})
@@ -102,6 +98,36 @@ module GoCart
 
       end
     end
+
+    describe "with invalid input" do
+      let(:recorder) { recorder_lambda }
+      before do
+        100.times do |i|
+          100.times do |j|
+            recorder.validate(i* 200 + j, {one: true, two: true, three: 'moe'})
+            recorder.validate(i* 200 + j + 1, {one: true, two: true, three: "bob-#{j}"})
+          end
+        end
+      end
+
+      it 'should report correct number of rows' do
+        recorder.rows_processed.should eq 20000
+      end
+
+      it 'should report presence of errors' do
+        recorder.has_errors?.should be_true
+      end
+
+      it 'should report correct number of errors' do
+        recorder.total_errors.should eq 10000
+      end
+
+      it 'should report correct number of calls to validator' do
+        recorder.total_errors #force final evaluation of all errors
+        StubCodeLookup.call_count.should be <= 11
+      end
+    end
+
 
   end
 end
