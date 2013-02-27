@@ -16,9 +16,10 @@ require 'go_cart/generator'
 require 'go_cart/generator_from_data'
 require 'go_cart/generator_from_schema'
 
-require 'go_cart/loader'
-require 'go_cart/loader_from_csv'
-require 'go_cart/loader_from_fixed'
+require 'go_cart/loader/loader'
+require 'go_cart/loader/loader_from_csv'
+require 'go_cart/loader/loader_from_fixed'
+require 'go_cart/loader/raw_table_converter'
 
 require 'go_cart/validation/validator'
 require 'go_cart/validation/group_validator'
@@ -31,8 +32,6 @@ require 'go_cart/target_db'
 require 'go_cart/target_file'
 
 # Files after this point are from the modular go-cart effort
-require 'go_cart/loader/csv_loader'
-
 require 'go_cart/transform/hash_mapper'
 require 'go_cart/transform/hash_mapper_config'
 require 'go_cart/transform/special_maps'

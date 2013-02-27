@@ -39,6 +39,20 @@ module GoCart
       error_count.count
     end
 
+    def report
+      err = errors
+      <<-END
+Validation Performed on #{rows_processed} rows.
+#{total_errors} errors found
+#{rows_with_errors} lines with errors detected
+==========================================DETAILS=================================================
+#{
+errors.
+    map {|err| "Line #{err.line_number}, #{err.validator.name} found an issue with #{err.field}: #{err.explanation}"}.
+    join("\n")}
+      END
+    end
+
     private
     def validate_value(input)
       get_validators(input.field).each do |v|

@@ -4,14 +4,15 @@ require_relative 'go_cart_def'
 
 module GoCart
   class GoCartVal < GoCartDef
+    def options
+      @options ||= {}
+    end
 
     def execute
-      #Runner.load_formats(options[:format_file])
-      #
-      #options = Hash.new
-      #
-      #runner = Runner.new()
-      #runner.load_data_files(nil, Dir.glob(File.expand_path(options[:data_file])), get_mapper, options)
+      ValidationRunner.load_formats(options[:format_file])
+
+      runner = ValidationRunner.new()
+      runner.validate_data_files(Dir.glob(File.expand_path(options[:data_file])), get_mapper, options)
     end
 
     def parse_options(opts)

@@ -81,7 +81,22 @@ class Runner
         target.db_suffix = @db_suffix
         target.db_schema = @db_schema
 
-        loader.load(file, file_mapper, format_table, schema_table, target)
+        target.open schema_table
+        begin
+          mapping = mapper.get_mapping schema_table.symbol
+          loader.load(file, format_table) do |row, line_number|
+            begin
+              field_data = mapping.map_fields(raw_values)
+            rescue Exception => e
+              raise GoCart::Errors::LoaderError.new(file, line_number, e)
+            end
+            target.emit field_data unless field_data.nil?
+          end
+        ensure
+          target.close
+        end
+
+
         target.import(dbconfig, schema_table) if @bulk_load
       ensure
   			target.delete if bulk_delete unless target.nil?
