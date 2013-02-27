@@ -16,7 +16,6 @@ module GoCart
   end
 
   class FakeGroupLambdaValidator < Validator
-    #validate_group 500, :validate_unique_codes
     validate_group 500, ->(values) {StubCodeLookup.lookup_codes(values)}
 
     def self.validate_unique_codes(values)
@@ -25,8 +24,7 @@ module GoCart
   end
 
   class FakeGroupClassFunctionValidator < Validator
-    #validate_group 500, :validate_unique_codes
-    validate_group 500, ->(values) {StubCodeLookup.lookup_codes(values)}
+    validate_group 500, :validate_unique_codes
 
     def self.validate_unique_codes(values)
       StubCodeLookup.lookup_codes(values)
