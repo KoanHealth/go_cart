@@ -14,10 +14,12 @@ class Main
 		case ARGV[0]
 		when /^g(en)?(erate)?$/i
 			cmd = GoCart::GoCartGen.new
-			when /^r(un)?$/i
-				cmd = GoCart::GoCartRun.new
-			when /^s(ql)?$/i
-				cmd = GoCart::GoCartSql.new
+    when /^v(al)?(idate)?$/i
+      cmd = GoCart::GoCartVal.new
+    when /^r(un)?$/i
+      cmd = GoCart::GoCartRun.new
+    when /^s(ql)?$/i
+      cmd = GoCart::GoCartSql.new
 		when nil
 			parse_err_options 'Command is required.', opts
 		else
@@ -41,6 +43,7 @@ private
 		opts.separator ""
 		opts.separator "COMMANDS:"
 		opts.separator "\tGEN - Generate a format file from a data file or schema file"
+		opts.separator "\tVAL - Verify that data in a file conforms to the validation rules specified in a format file"
 		opts.separator "\tRUN - Insert data into a database using the specified format"
 		opts.separator "\tSQL - Generate SQL code to map from one table to another table"
 
