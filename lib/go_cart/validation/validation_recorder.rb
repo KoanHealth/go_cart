@@ -42,8 +42,7 @@ module GoCart
     private
     def validate_value(input)
       get_validators(input.field).each do |v|
-        result = v.validate(input)
-        errors.push result if result
+        v.validate(input)
       end
     end
 
@@ -54,7 +53,7 @@ module GoCart
           next unless v
           case v
             when Symbol
-              Validator.get(symbol, v)
+              Validator.get(v)
             else
               v.clone
           end
@@ -68,7 +67,9 @@ module GoCart
     end
 
     def errors
-      @errors ||= []
+      validators.values.map do |validator_array|
+        validator_array.map {|v| v.get_errors}.flatten
+      end.flatten
     end
   end
 end
