@@ -77,7 +77,7 @@ end
 class FormatField < CommonField
 
   attr_accessor :index, :header, :name, :description
-	attr_reader :start, :end, :length
+	attr_reader :start, :end, :length, :validation
 
   def initialize(symbol, type, options = {})
     super
