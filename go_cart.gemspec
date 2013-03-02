@@ -13,7 +13,7 @@ Gem::Specification.new do |gem|
 	gem.description = 'GoCart is a ruby library for flat-file field loading.'
 
 	gem.files = `git ls-files`.split($/)
-	gem.executables = ["go_cart.rb"]
+	gem.executables = ['go_cart.rb']
 	gem.test_files = gem.files.grep(%r{^(test|spec|features)/})
 	gem.require_paths = ["lib"]
 
