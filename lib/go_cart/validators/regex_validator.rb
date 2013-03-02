@@ -2,17 +2,17 @@ module GoCart
   class RegexValidator < Validator
     dont_register
 
-    def initialize(expression, message = nil)
+    def initialize(expression, name = nil)
       @expression = expression
-      @message = message
+      @name = name
     end
 
-    def message
-      @message || 'Did not match expected pattern'
+    def name
+      @name || super
     end
 
     def validate(input)
-      failed(input, message) unless @expression =~ input.value
+      failed(input) unless @expression =~ input.value
     end
   end
 end

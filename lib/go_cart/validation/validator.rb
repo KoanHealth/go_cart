@@ -1,14 +1,19 @@
 module GoCart
   class Validator
-    Error = Struct.new(:validator, :field, :value, :line_number, :explanation)
+    attr_accessor :field
+
     Input = Struct.new(:line_number, :row, :field, :value)
 
-    def failed(input, explanation)
-      errors.push Error.new(self, input.field, input.value, input.line_number, explanation)
+    def failed(input)
+      error_information.failed(input)
     end
 
-    def get_errors
-      errors
+    def get_error_information
+      finalize_validation
+      error_information
+    end
+
+    def finalize_validation
     end
 
     def symbol;
@@ -64,8 +69,9 @@ module GoCart
       @classes ||= []
     end
 
-    def errors
-      @errors ||= []
+    def error_information
+      @error_information ||= ErrorInformation.new(self)
     end
+
   end
 end

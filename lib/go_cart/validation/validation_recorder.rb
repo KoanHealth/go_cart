@@ -22,34 +22,31 @@ module GoCart
     end
 
     def has_errors?
-      total_errors > 0
+      error_information.any? {|ei| ei.has_errors?}
     end
 
     def total_errors
-      errors.count
+      error_information.reduce(0) do |total, ei|
+        total += ei.failed_lines
+      end
     end
 
-    def errors_for(field)
-      errors.select {|e| e.field == field}
+    def error_information_for(field)
+      validators[field].map {|v| v.get_error_information}
     end
 
-    def rows_with_errors
-      error_count = Hash.new(0)
-      errors.each { |e| error_count[e.line_number] += 1 }
-      error_count.count
+    def total_errors_for(field)
+      validators[field].map {|v| v.get_error_information}.reduce(0) do |total, ei|
+        total += ei.failed_lines
+      end
     end
 
     def report
-      err = errors
       <<-END
 Validation Performed on #{rows_processed} rows.
 #{total_errors} errors found
-#{rows_with_errors} lines with errors detected
-==========================================DETAILS=================================================
-#{
-errors.
-    map {|err| "Line #{err.line_number}, #{err.validator.name} found an issue with #{err.field}: #{err.explanation}"}.
-    join("\n")}
+#{'DETAILS'.center(80,'=')}
+#{error_information.map {|ei| ei.report(rows_processed)}.join(''.center(80,'-') + "\n")}
       END
     end
 
@@ -60,9 +57,9 @@ errors.
       end
     end
 
-    def get_validators(symbol)
-      validators.fetch(symbol) do
-        field = format.get_field(symbol)
+    def get_validators(field_symbol)
+      validators.fetch(field_symbol) do
+        field = format.get_field(field_symbol)
         field_validators = [field.validation].flatten.map do |v|
           next unless v
           case v
@@ -72,7 +69,8 @@ errors.
               v.clone
           end
         end.compact
-        validators[symbol] = field_validators
+        field_validators.each {|v| v.field = field_symbol}
+        validators[field_symbol] = field_validators
       end
     end
 
@@ -80,10 +78,12 @@ errors.
       @validators ||= {}
     end
 
-    def errors
+    def error_information
       validators.values.map do |validator_array|
-        validator_array.map {|v| v.get_errors}.flatten
+        validator_array.map {|v| v.get_error_information}.flatten
       end.flatten
     end
+
+
   end
 end

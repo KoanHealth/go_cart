@@ -11,7 +11,7 @@ module GoCart
           t.boolean :two, header: :two
           t.string :three, header: :three, :validation => :required_field
           t.integer :four, header: :four
-          t.string :five, header: :five, :validation => RegexValidator.new(/^rose(bud)?$/, 'your flower stinks')
+          t.string :five, header: :five, :validation => RegexValidator.new(/^rose(bud)?$/, 'Verify Roses')
         end
       end
     end
@@ -70,16 +70,19 @@ module GoCart
       end
 
       it 'should report two errors on field five' do
-        recorder.errors_for(:five).count.should eq 2
+        recorder.total_errors_for(:five).should eq 2
       end
 
       it 'should report one error on field three' do
-        recorder.errors_for(:three).count.should eq 1
+        recorder.total_errors_for(:three).should eq 1
       end
 
-      it 'should report two rows with errors' do
-        recorder.rows_with_errors.should eq 2
+      it 'report should be coherent' do
+        report = recorder.report
+        puts report
+        report.should include('First line violating rule')
       end
+
     end
 
   end

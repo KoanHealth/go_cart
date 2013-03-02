@@ -9,7 +9,7 @@ module GoCart
 
       gathered.map do |key, value|
         value.map do |bad_input|
-          failed(bad_input, "Invalid code #{key} encountered in field #{bad_input.field}")
+          failed(bad_input)
           blacklist[key] = value.count
         end
       end.reduce([]) { |a, v| a.concat v }
@@ -21,7 +21,7 @@ module GoCart
       if whitelist.has_key? input.value
         return
       elsif blacklist.has_key? input.value
-        failed(input, "Invalid code #{input.value} encountered in field #{input.field}")
+        failed(input)
         return
       end
 
@@ -29,9 +29,8 @@ module GoCart
       validate_gathered if gathered.count >= self.class.group_validator_group_count
     end
 
-    def get_errors
+    def finalize_validation
       validate_gathered unless gathered.empty?
-      errors
     end
 
     def gathered
