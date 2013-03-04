@@ -31,7 +31,7 @@ Validating #{validator.name} on field #{validator.field}
 #{failed_lines} line(s) violated this rule (#{((failed_lines.to_f / total_lines.to_f) * 100.0).round(1)}%)
 First line violating rule: #{first_line}
 #{'Most Frequent Invalid Entries'.center(80, '.')}
-#{most_frequent_failed_values(10).map {|v| "#{v[0]}:\t#{v[1]}"}.join("\n")}
+#{most_frequent_failed_values(10).map {|v| "#{v[0]}:\t#{v[1]} times"}.join("\n")}
 
     END
   end
@@ -52,11 +52,10 @@ First line violating rule: #{first_line}
   def most_frequent_failed_values(limit)
     failed_values_copy = failed_values.dup
     if failed_values.count > limit
-
-      threshold = failed_values.values.sort.instance_eval {|array| array[limit -1]}
+      threshold = failed_values.values.sort.reverse.instance_eval {|array| array[limit -1]}
       failed_values_copy.delete_if {|k,v| v < threshold}
     end
 
-    failed_values_copy.map{|k,v| [k,v]}.sort{|v1,v2| v1[1] <=> v2[1]}
+    failed_values_copy.map{|k,v| [k,v]}.sort{|v1,v2| v2[1] <=> v1[1]}
   end
 end
