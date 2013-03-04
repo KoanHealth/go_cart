@@ -11,7 +11,7 @@ class GoCartRun < GoCartDef
 
 	def execute()
 		dbconfig = get_dbconfig
-		Runner.load_formats(@format_file)
+		FormatLoader.load_formats(@format_file)
 
 		options = Hash.new
 		options[:table_names] = @table_names unless @table_names.nil?

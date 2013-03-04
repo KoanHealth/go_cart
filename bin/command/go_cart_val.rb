@@ -9,7 +9,7 @@ module GoCart
     end
 
     def execute
-      ValidationRunner.load_formats(options[:format_file])
+      FormatLoader.load_formats(options[:format_file])
 
       runner = ValidationRunner.new()
       runner.validate_data_files(Dir.glob(File.expand_path(options[:data_file])), get_mapper, options)
