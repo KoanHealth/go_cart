@@ -16,6 +16,12 @@ module GoCart
     def finalize_validation
     end
 
+    def test(value, field = nil, row = nil, line_number = 0)
+      v = self.clone
+      v.validate(Input.new(line_number, row, field, value))
+      v.get_error_information
+    end
+
     def symbol;
       self.class.validator_symbol
     end

@@ -85,6 +85,26 @@ module GoCart
 
     end
 
+    describe 'Simple checks for test_validate' do
+      let(:validator) {RequiredFieldValidator.new}
+
+      it 'should provide nil report, but string inspect with no errors' do
+        result = validator.test('bob')
+        result.report.should be_nil
+        result.inspect.should_not be_nil
+        result.inspect.is_a?(String).should be_true
+      end
+
+      it 'should provide string report and inspect with errors' do
+        result = validator.test(nil)
+        result.report.should_not be_nil
+        result.inspect.should_not be_nil
+        result.report.is_a?(String).should be_true
+        result.inspect.is_a?(String).should be_true
+
+      end
+    end
+
   end
 
 end

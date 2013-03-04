@@ -53,7 +53,7 @@ module GoCart
     let(:recorder_lambda) { ValidationRecorder.new(GroupedSimpleFormat.new.get_table(:simple_format_lambda)) }
     let(:recorder_class) { ValidationRecorder.new(GroupedSimpleFormat.new.get_table(:simple_format_class)) }
 
-    describe "with valid input (lambda)" do
+    describe 'with valid input (lambda)' do
       let(:recorder) { recorder_lambda }
       before do
         100.times do |v|
@@ -76,7 +76,7 @@ module GoCart
       end
     end
 
-    describe "with valid input (class)" do
+    describe 'with valid input (class)' do
       let(:recorder) { recorder_class }
       before do
         100.times do |v|
@@ -99,7 +99,7 @@ module GoCart
       end
     end
 
-    describe "with invalid input" do
+    describe 'with invalid input' do
       let(:recorder) { recorder_lambda }
       before do
         100.times do |i|
@@ -126,6 +126,33 @@ module GoCart
         recorder.total_errors #force final evaluation of all errors
         StubCodeLookup.call_count.should be <= 11
       end
+    end
+
+    describe 'when testing validator, results should be immediately tested' do
+      before do
+        StubCodeLookup.reset_call_count
+        StubCodeLookup.valid_codes = %w(larry moe curly)
+      end
+
+      let (:validator) {FakeGroupLambdaValidator.new}
+      it 'with invalid input, should immediately report error' do
+        validator.test('frank').has_errors?.should be_true
+      end
+
+      it 'every call to test_validate should invoke the remote service' do
+        validator.test('frank')
+        validator.test('larry')
+        validator.test('moe')
+        StubCodeLookup.call_count.should be == 3
+      end
+
+      it 'repeated calls (with same value) to test_validate should always invoke the remote service' do
+        validator.test('moe')
+        validator.test('moe')
+        validator.test('moe')
+        StubCodeLookup.call_count.should be == 3
+      end
+
     end
 
 

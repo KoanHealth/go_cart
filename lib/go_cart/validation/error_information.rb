@@ -23,16 +23,21 @@ class ErrorInformation
     record_failed_value(input.value)
   end
 
-  def report(total_lines)
+
+  def inspect
+    report || 'No errors'
+  end
+
+  def report(total_lines = nil)
     return nil unless has_errors?
+    violating_lines_percent = total_lines ? "#{ ((failed_lines.to_f / total_lines.to_f) * 100.0).round(1)}%" : '--'
 
     <<-END
 Validating #{validator.name} on field #{validator.field}
-#{failed_lines} line(s) violated this rule (#{((failed_lines.to_f / total_lines.to_f) * 100.0).round(1)}%)
+#{failed_lines} line(s) violated this rule (#{violating_lines_percent})
 First line violating rule: #{first_line}
 #{'Most Frequent Invalid Entries'.center(80, '.')}
 #{most_frequent_failed_values(10).map {|v| "#{v[0]}:\t#{v[1]} times"}.join("\n")}
-
     END
   end
 
