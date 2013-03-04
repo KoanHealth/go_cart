@@ -24,6 +24,5 @@ Gem::Specification.new do |gem|
 	gem.add_dependency "pg"
 
 	gem.add_development_dependency "rspec"
-	#gem.add_development_dependency "simplecov"
-
+	gem.add_development_dependency "simplecov"
 end
