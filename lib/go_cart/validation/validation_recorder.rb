@@ -46,7 +46,7 @@ module GoCart
 Validation Performed on #{rows_processed} rows.
 #{total_errors} errors found
 #{'DETAILS'.center(80,'=')}
-#{error_information.map {|ei| ei.report(rows_processed)}.join(''.center(80,'-') + "\n")}
+#{error_information.map {|ei| ei.report(rows_processed)}.compact.join(''.center(80,'-') + "\n")}
       END
     end
 
