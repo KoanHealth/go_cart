@@ -57,17 +57,9 @@ module GoCart
     def get_format_table(mapper, file)
       format_table = nil
       has_headers = GoCart::FileUtils.has_headers?(file)
-      if @table_names.nil? && has_headers
+      if has_headers
         headers = GoCart::FileUtils.get_headers(file)
         format_table = mapper.format.identify_table(headers)
-      elsif !@table_names.nil? && has_headers
-        headers = GoCart::FileUtils.get_headers(file)
-        @table_names.each do |table_name|
-          format_table = mapper.format.get_table(table_name.to_sym)
-          next if format_table.nil?
-          break if format_table.matches?(headers)
-          format_table = nil
-        end
       elsif mapper.format.tables.size == 1
         format_table = mapper.format.tables.first[1]
       end
