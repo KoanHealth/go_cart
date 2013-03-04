@@ -16,12 +16,12 @@ module GoCart
 
       it 'should yield 16 rows' do
         count = 0
-        LoaderFromCsv.new().load(file_name, format_table) {count += 1}
+        LoaderFromCsv.foreach(file_name, format_table) {count += 1}
         count.should eq 16
       end
 
       it 'should provide expected data for each row' do
-        LoaderFromCsv.new().load(file_name, format_table) do |raw|
+        LoaderFromCsv.foreach(file_name, format_table) do |raw|
           row = converter.convert(raw)
           row[:a].should eq '1'
           row[:b].should eq '2'
@@ -38,12 +38,12 @@ module GoCart
 
       it 'should yield 16 rows' do
         count = 0
-        LoaderFromCsv.new().load(file_name, format_table) {count += 1}
+        LoaderFromCsv.foreach(file_name, format_table) {count += 1}
         count.should eq 16
       end
 
       it 'should provide expected data for each row' do
-        LoaderFromCsv.new().load(file_name, format_table) do |raw|
+        LoaderFromCsv.foreach(file_name, format_table) do |raw|
           row = converter.convert(raw)
 
           row[:a].should eq '1'
@@ -61,12 +61,12 @@ module GoCart
 
       it 'should yield 16 rows' do
         count = 0
-        LoaderFromCsv.new().load(file_name, format_table) {count += 1}
+        LoaderFromCsv.foreach(file_name, format_table) {count += 1}
         count.should eq 16
       end
 
       it 'should provide expected data for each row' do
-        LoaderFromCsv.new().load(file_name, format_table) do |raw|
+        LoaderFromCsv.foreach(file_name, format_table) do |raw|
           row = converter.convert(raw)
 
           row[:a].should eq '1'

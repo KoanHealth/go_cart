@@ -9,6 +9,7 @@ require 'go_cart/schema'
 require 'go_cart/mapper'
 require 'go_cart/runner'
 require 'go_cart/validation_runner'
+require 'go_cart/format_loader'
 
 require 'go_cart/schema_table_migrator'
 require 'go_cart/schema_migrator'

@@ -1,7 +1,7 @@
 module GoCart
   class LoaderFromFixed < Loader
 
-    def load(file, format_table)
+    def self.foreach(file, format_table)
       filter = format_table.filter
 
       line_number = 0

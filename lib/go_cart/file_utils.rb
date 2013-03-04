@@ -7,6 +7,11 @@ class FileUtils
   CHAR_BUFFER_SIZE = 500
   MAX_LINE_LENGTH = 50000
 
+  def self.clean_string(record)
+    return record if record.nil? || record.blank?
+    (record[0] == '"' ? record[1, record.length] : record).chomp('"').strip
+  end
+
   def self.has_headers?(input_file)
 		return get_csv_options(input_file, true)[:headers]
  	end
@@ -19,7 +24,7 @@ class FileUtils
 		CSV.foreach(input_file, options) do |row|
 			if row.header_row?
 				row.each do |symbol, value|
-					headers << value
+					headers << clean_string(value)
 				end
 			end
 			break

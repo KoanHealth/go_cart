@@ -51,9 +51,9 @@ class Runner
 			raise "Cannot find schema mapping for #{format_table.symbol}" if schema_table.nil?
 
 			if format_table.fixed_length
-				loader = LoaderFromFixed.new
+				loader = LoaderFromFixed
 			else
-				loader = LoaderFromCsv.new
+				loader = LoaderFromCsv
 			end
 
 			bulk_delete = false
@@ -73,9 +73,9 @@ class Runner
         target.open schema_table
         begin
           mapping = mapper.get_mapping schema_table.symbol
-          loader.load(file, format_table) do |row, line_number|
+          loader.foreach(file, format_table) do |row, line_number|
             begin
-              field_data = mapping.map_fields(raw_values)
+              field_data = mapping.map_fields(row)
             rescue Exception => e
               raise GoCart::Errors::LoaderError.new(file, line_number, e)
             end

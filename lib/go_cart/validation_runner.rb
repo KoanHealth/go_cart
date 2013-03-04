@@ -9,16 +9,12 @@ module GoCart
         schema_table = file_mapper.get_schema_for_format(format_table)
         raise "Cannot find schema mapping for #{format_table.symbol}" if schema_table.nil?
 
-        if format_table.fixed_length
-          loader = LoaderFromFixed.new
-        else
-          loader = LoaderFromCsv.new
-        end
+        loader =  format_table.fixed_length ? LoaderFromFixed : LoaderFromCsv
 
         converter = RawTableConverter.new(format_table)
         table_reporter = ValidationRecorder.new(format_table)
 
-        loader.load(file, format_table) do |raw, line_number|
+        loader.foreach(file, format_table) do |raw, line_number|
           row = converter.convert(raw)
           table_reporter.validate(line_number, row)
         end
