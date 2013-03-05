@@ -86,12 +86,12 @@ class Mapping
 		maps[symbol][:translator] = code if block_given?
 	end
 
-	def map_fields(raw_values)
-		field_data = []
+  def map_row(raw_values)
+		field_data = {}
 		schema_table.fields.each do |symbol, schema_field|
       begin
         info = maps[schema_field.symbol]
-        field_data << nil if info.nil?
+        field_data[schema_field.symbol] = nil if info.nil?
 
         value = nil
         case info[:type]
@@ -104,13 +104,17 @@ class Mapping
           value = info[:value]
         end
         value = info[:translator].call(value) if info[:translator]
-        field_data << value
+        field_data[schema_field.symbol] = value
       rescue Exception => e
         raise GoCart::Errors::MappingError.new(schema_field, e)
       end
 		end
     field_data
-	end
+  end
+
+  def map_fields(raw_values)
+    map_row(raw_values).values
+  end
 
 end
 

@@ -39,6 +39,10 @@ module GoCart
         options[:schema_name] = value
       end
 
+      opts.on('-p', '--post', 'perform validation after applying the map') do
+        options[:post_mapping] = true
+      end
+
       parse_def_options opts
 
       # Verify arguments

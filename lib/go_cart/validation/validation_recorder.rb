@@ -22,7 +22,7 @@ module GoCart
     end
 
     def has_errors?
-      error_information.any? {|ei| ei.has_errors?}
+      error_information.any? { |ei| ei.has_errors? }
     end
 
     def total_errors
@@ -32,11 +32,11 @@ module GoCart
     end
 
     def error_information_for(field)
-      validators[field].map {|v| v.get_error_information}
+      validators[field].map { |v| v.get_error_information }
     end
 
     def total_errors_for(field)
-      validators[field].map {|v| v.get_error_information}.reduce(0) do |total, ei|
+      validators[field].map { |v| v.get_error_information }.reduce(0) do |total, ei|
         total += ei.failed_lines
       end
     end
@@ -45,8 +45,8 @@ module GoCart
       <<-END
 Validation Performed on #{rows_processed} rows.
 #{total_errors} errors found
-#{'DETAILS'.center(80,'=')}
-#{error_information.map {|ei| ei.report(rows_processed)}.compact.join(''.center(80,'-') + "\n")}
+#{'DETAILS'.center(80, '=')}
+      #{error_information.map { |ei| ei.report(rows_processed) }.compact.join(''.center(80, '-') + "\n")}
       END
     end
 
@@ -60,16 +60,21 @@ Validation Performed on #{rows_processed} rows.
     def get_validators(field_symbol)
       validators.fetch(field_symbol) do
         field = format.get_field(field_symbol)
-        field_validators = [field.validation].flatten.map do |v|
-          next unless v
-          case v
-            when Symbol
-              Validator.get(v)
-            else
-              v.clone
-          end
-        end.compact
-        field_validators.each {|v| v.field = field_symbol}
+        if field
+          field_validators = [field.validation].flatten.map do |v|
+            next unless v
+            case v
+              when Symbol
+                Validator.get(v)
+              else
+                v.clone
+            end
+          end.compact
+          field_validators.each { |v| v.field = field_symbol }
+        else
+          field_validators = []
+        end
+
         validators[field_symbol] = field_validators
       end
     end
@@ -80,7 +85,7 @@ Validation Performed on #{rows_processed} rows.
 
     def error_information
       validators.values.map do |validator_array|
-        validator_array.map {|v| v.get_error_information}.flatten
+        validator_array.map { |v| v.get_error_information }.flatten
       end.flatten
     end
 
