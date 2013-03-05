@@ -12,7 +12,7 @@ module GoCart
     end
 
     def validate(input)
-      failed(input) unless @expression =~ input.value
+      failed(input) unless @expression =~ input.value.to_s
     end
   end
 end
