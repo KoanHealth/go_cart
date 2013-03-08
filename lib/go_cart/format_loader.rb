@@ -1,4 +1,4 @@
-module FormatLoader
+module GoCart::FormatLoader
   def self.load_formats(formats)
     formats.each do |format|
       file_count = 0
