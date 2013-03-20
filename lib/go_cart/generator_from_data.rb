@@ -23,19 +23,42 @@ private
 		samples = 0
 		symbol_map = {}
 		options = FileUtils.get_csv_options(data_file)
-		CSV.foreach(data_file, options) do |row|
-			if options[:headers]
-				if row.header_row?
-					@current_fields.clear
-					row.each do |header|
-						symbol = TypeUtils.to_symbol(header[1])
-						add_new_field(symbol, :string, { :header => header[1] })
-						@current_fields[header[0]] = Hash.new { |h,k| h[k] = { :count => 0, :size => 0 } }
-						symbol_map[header[0]] = symbol
+		line_number = 0
+		begin
+			CSV.foreach(data_file, options) do |row|
+				line_number += 1
+				if options[:headers]
+					if row.header_row?
+						@current_fields.clear
+						row.each do |header|
+							symbol = TypeUtils.to_symbol(header[1])
+							add_new_field(symbol, :string, { :header => header[1] })
+							@current_fields[header[0]] = Hash.new { |h,k| h[k] = { :count => 0, :size => 0 } }
+							symbol_map[header[0]] = symbol
+						end
+					else
+						@current_fields.each do |symbol, types|
+							value = row[symbol]
+							type = TypeUtils.infer_type_symbol(value)
+							next if type.nil?
+
+							hash = types[type]
+							hash[:count] += 1
+							hash[:size] = value.length unless hash[:size] > value.length
+						end
 					end
 				else
-					@current_fields.each do |symbol, types|
-						value = row[symbol]
+					if @current_fields.empty?
+						row.each_with_index do |value, index|
+							symbol = "field#{index+1}".to_sym
+							add_new_field(symbol, :string, { :index => index+1 })
+							@current_fields[symbol] = Hash.new { |h,k| h[k] = { :count => 0, :size => 0 } }
+							symbol_map[symbol] = symbol
+						end
+					end
+					row.each_with_index do |value, index|
+						symbol = "field#{index+1}".to_sym
+						types = @current_fields[symbol]
 						type = TypeUtils.infer_type_symbol(value)
 						next if type.nil?
 
@@ -44,29 +67,13 @@ private
 						hash[:size] = value.length unless hash[:size] > value.length
 					end
 				end
-			else
-				if @current_fields.empty?
-					row.each_with_index do |value, index|
-						symbol = "field#{index+1}".to_sym
-						add_new_field(symbol, :string, { :index => index+1 })
-						@current_fields[symbol] = Hash.new { |h,k| h[k] = { :count => 0, :size => 0 } }
-						symbol_map[symbol] = symbol
-					end
-				end
-				row.each_with_index do |value, index|
-					symbol = "field#{index+1}".to_sym
-					types = @current_fields[symbol]
-					type = TypeUtils.infer_type_symbol(value)
-					next if type.nil?
-
-					hash = types[type]
-					hash[:count] += 1
-					hash[:size] = value.length unless hash[:size] > value.length
-				end
+				break if samples >= MAX_SAMPLES
+				samples += 1
 			end
-			break if samples >= MAX_SAMPLES
-			samples += 1
+		rescue
+			raise $!, "#{$!} at line ##{line_number}", $!.backtrace
 		end
+
 		@current_fields.each do |symbol, types|
 			symbol = symbol_map[symbol]
 			format_field = @current_format_table.get_field(symbol)

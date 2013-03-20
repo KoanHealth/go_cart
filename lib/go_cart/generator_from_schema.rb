@@ -12,17 +12,23 @@ class GeneratorFromSchema < Generator
 private
 
 	def from_schema_file(schema_file)
-		File.open(schema_file, 'r').each do |line|
-			next if line =~ /^\s*$/
-			line.chomp!
+		line_number = 0
+		begin
+			File.open(schema_file, 'r').each do |line|
+				line_number += 1
+				next if line =~ /^\s*$/
+				line.chomp!
 
-			if line =~ /^\s*##\s*(.+)/
-				handle_directive $1
-			elsif line =~ /\t/
-				handle_field line.split("\t")
-			else
-				handle_field line.split(',')
+				if line =~ /^\s*##\s*(.+)/
+					handle_directive $1
+				elsif line =~ /\t/
+					handle_field line.split("\t")
+				else
+					handle_field line.split(',')
+				end
 			end
+		rescue
+			raise $!, "#{$!} at line ##{line_number}", $!.backtrace
 		end
 	end
 
