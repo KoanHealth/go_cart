@@ -144,6 +144,8 @@ private
 				break if format_table.matches?(headers)
 				format_table = nil
 			end
+		elsif !@table_names.nil? && @table_names.size == 1
+			format_table = mapper.format.get_table(@table_names[0].to_sym)
 		elsif mapper.format.tables.size == 1
 			format_table = mapper.format.tables.first[1]
 		end
