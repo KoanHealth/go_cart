@@ -12,8 +12,8 @@ class GoCartSql < GoCartDef
 	end
 
 	def execute()
-		Runner.load_formats(@from_format) unless @from_format.nil?
-		Runner.load_formats(@to_format) unless @to_format.nil?
+		FormatLoader.load_formats(@from_format) unless @from_format.nil?
+    FormatLoader.load_formats(@to_format) unless @to_format.nil?
 
 		from_table = get_table(@from_schema, @from_table)
 		to_table = get_table(@to_schema, @to_table)

@@ -130,30 +130,31 @@ private
 		return mapper, format_table
 	end
 
-	def get_format_table(mapper, file)
-		format_table = nil
-		has_headers = GoCart::FileUtils.has_headers?(file)
-		if @table_names.nil? && has_headers
-			headers = GoCart::FileUtils.get_headers(file)
-			format_table = mapper.format.identify_table(headers)
-		elsif !@table_names.nil? && has_headers
-			headers = GoCart::FileUtils.get_headers(file)
-			@table_names.each do |table_name|
-				format_table = mapper.format.get_table(table_name.to_sym)
-				next if format_table.nil?
-				break if format_table.matches?(headers)
-				format_table = nil
-			end
-		elsif !@table_names.nil? && @table_names.size == 1
-			format_table = mapper.format.get_table(@table_names[0].to_sym)
-		elsif mapper.format.tables.size == 1
-			format_table = mapper.format.tables.first[1]
-		end
-		return format_table
-	end
+  def get_format_table(mapper, file)
+    format_table = nil
+    has_headers = GoCart::FileUtils.has_headers?(file)
+    if !@table_names.nil? && @table_names.size == 1
+      format_table = mapper.format.get_table(@table_names[0].to_sym)
+    elsif mapper.format.tables.size == 1
+      format_table = mapper.format.tables.first[1]
+    elsif @table_names.nil? && has_headers
+      headers = GoCart::FileUtils.get_headers(file)
+      format_table = mapper.format.identify_table(headers)
+    elsif !@table_names.nil? && has_headers
+      headers = GoCart::FileUtils.get_headers(file)
+      @table_names.each do |table_name|
+        format_table = mapper.format.get_table(table_name.to_sym)
+        next if format_table.nil?
+        break if format_table.matches?(headers)
+        format_table = nil
+      end
+    end
+    return format_table
+  end
 
 	def load_options(options)
-		@db_suffix = options[:db_suffix]
+    @table_names = options[:table_names]
+    @db_suffix = options[:db_suffix]
 		@db_schema = options[:db_schema]
 
 		@bulk_load = options[:bulk_load]
