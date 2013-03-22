@@ -6,7 +6,7 @@ INSERT INTO <%= to_table.symbol %> (
 <% end %>)
 SELECT
 <% mapping.each_with_index do |pair, index| %>    <%= pair.last.nil? ? 'null' : "src.#{pair.last}" %> as <%= pair.first %><%= index == to_table_max ? '' : ',' %>
-<% end %>FROM <%= from_table.symbol %> src
+<% end %>FROM <%= from_table.symbol %> src;
 /*
 <% from_table.fields.each do |symbol, field| %>    src.<%= symbol %>
 <% end %>*/
