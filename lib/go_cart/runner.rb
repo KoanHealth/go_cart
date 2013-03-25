@@ -46,7 +46,7 @@ class Runner
 
 		file_count = 0
 		data_files.each do |file|
-			file_mapper, format_table = get_mapper_format(file, mapper)
+			file_mapper, format_table = get_mapper_format(file, mapper, options)
 			schema_table = file_mapper.get_schema_for_format(format_table)
 			raise "Cannot find schema mapping for #{format_table.symbol}" if schema_table.nil?
 
@@ -110,11 +110,11 @@ class Runner
 
 private
 
-	def get_mapper_format(file, mapper = nil)
+	def get_mapper_format(file, mapper, options)
 		if mapper.nil?
 			Mapper.get_all_mapper_classes.each do |mapper_class|
 				mapper = mapper_class.new
-				format_table = get_format_table(mapper, file)
+				format_table = get_format_table(mapper, file, options)
 				return mapper, format_table unless format_table.nil?
 			end
 
@@ -122,7 +122,7 @@ private
 			raise "Must specify mapper class (ie. MyModule::MyMapper)" if mapper_class.nil?
 			mapper = mapper_class.new
 		end
-		format_table = get_format_table(mapper, file)
+		format_table = get_format_table(mapper, file, options)
 		if format_table.nil?
 			headers = FileUtils.get_headers(file)
 			raise "Unrecognized headers: " + headers.join(',')
@@ -130,8 +130,10 @@ private
 		return mapper, format_table
 	end
 
-  def get_format_table(mapper, file)
-    format_table = nil
+  def get_format_table(mapper, file, options)
+		format_table = options[:table]
+		return format_table unless format_table.nil?
+
     has_headers = GoCart::FileUtils.has_headers?(file)
     if !@table_names.nil? && @table_names.size == 1
       format_table = mapper.format.get_table(@table_names[0].to_sym)
@@ -153,8 +155,8 @@ private
   end
 
 	def load_options(options)
-    @table_names = options[:table_names]
-    @db_suffix = options[:db_suffix]
+		@table_names = options[:table_names]
+		@db_suffix = options[:db_suffix]
 		@db_schema = options[:db_schema]
 
 		@bulk_load = options[:bulk_load]
