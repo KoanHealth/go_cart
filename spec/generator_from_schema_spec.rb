@@ -26,7 +26,7 @@ module GoCart
     end
 
     it 'should fail if schema has duplicate fields' do
-      -> { generator.generate dup_fields_schema_file }.should raise_error 'Duplicate field: product_id'
+      -> { generator.generate dup_fields_schema_file }.should raise_error /Duplicate field: product_id/
     end
 
   end
