@@ -34,6 +34,7 @@ class FileUtils
 
 	def self.get_csv_options(input_file, ignore_noncsv = false)
 		samples = 0
+    header_line = nil
 		has_header = false
 		separators = Hash.new { |h,k| h[k] = 0 }
 
@@ -43,7 +44,10 @@ class FileUtils
 			next if line =~ /^\s*$/
 			line.chomp!
 
-			has_header = is_header_row?(line) if samples <= 0
+      if samples <= 0
+        header_line = line[0..100]
+  			has_header = is_header_row?(line)
+      end
 			sum_separators(separators, line)
 
 			samples += 1
@@ -65,7 +69,7 @@ class FileUtils
       end
       options[:row_sep] = eol_char
 		else
-			raise 'Data file is not a CSV file' unless ignore_noncsv
+			raise "Data file is not a CSV file\nHEADER: #{header_line}..." unless ignore_noncsv
 		end
 		return options
 	end
