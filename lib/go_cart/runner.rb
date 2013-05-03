@@ -114,7 +114,7 @@ private
 		if mapper.nil?
 			Mapper.get_all_mapper_classes.each do |mapper_class|
 				mapper = mapper_class.new
-				format_table = get_format_table(mapper, file, options)
+				format_table = get_format_table(mapper, file, options, false)
 				return mapper, format_table unless format_table.nil?
 			end
 
@@ -122,7 +122,7 @@ private
 			raise "Must specify mapper class (ie. MyModule::MyMapper)" if mapper_class.nil?
 			mapper = mapper_class.new
 		end
-		format_table = get_format_table(mapper, file, options)
+		format_table = get_format_table(mapper, file, options, true)
 		if format_table.nil?
 			headers = FileUtils.get_headers(file)
 			raise "Unrecognized headers: " + headers.join(',')
@@ -130,14 +130,14 @@ private
 		return mapper, format_table
 	end
 
-  def get_format_table(mapper, file, options)
+  def get_format_table(mapper, file, options, pick_one)
 		format_table = options[:table]
 		return format_table unless format_table.nil?
 
     has_headers = GoCart::FileUtils.has_headers?(file)
     if !@table_names.nil? && @table_names.size == 1
       format_table = mapper.format.get_table(@table_names[0].to_sym)
-    elsif mapper.format.tables.size == 1
+    elsif mapper.format.tables.size == 1 && pick_one
       format_table = mapper.format.tables.first[1]
     elsif @table_names.nil? && has_headers
       headers = GoCart::FileUtils.get_headers(file)
