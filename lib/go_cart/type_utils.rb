@@ -75,8 +75,6 @@ class TypeUtils
 			return :float
 		when /^[+-]?\d+\.\d{2}$/
 			return :decimal
-    when /^[+-]?\d{1,9}.0$/
-      return :integer
     when /^[+-]?\d{1,9}$/
       return :integer
 		else
