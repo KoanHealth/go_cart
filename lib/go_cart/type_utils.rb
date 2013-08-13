@@ -73,10 +73,12 @@ class TypeUtils
 			return :boolean
 		when /^[+-]?\d+\.\d{3,}$/
 			return :float
-		when /^[+-]?\d+\.\d+$/
+		when /^[+-]?\d+\.\d{2}$/
 			return :decimal
-		when /^[+-]?\d{1,8}$/
-			return :integer
+    when /^[+-]?\d{1,9}.0$/
+      return :integer
+    when /^[+-]?\d{1,9}$/
+      return :integer
 		else
 			return :string
 		end

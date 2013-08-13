@@ -5,23 +5,27 @@ class GoCartSql < GoCartDef
 
 	attr_accessor :from_format, :from_schema, :from_table, :to_format, :to_schema, :to_table
 
-	def initialize()
+	def initialize
 		super
+    @create = false
 		@ignore_words = {}
 		@replace_words = {}
 	end
 
-	def execute()
-		FormatLoader.load_formats(@from_format) unless @from_format.nil?
+	def execute
     FormatLoader.load_formats(@to_format) unless @to_format.nil?
-
-		from_table = get_table(@from_schema, @from_table)
 		to_table = get_table(@to_schema, @to_table)
 
-		# mapping variable is used by ERB template
-		mapping = map_fields(from_table, to_table)
 		template_directory = File.join(@script_dir, '../../templates')
-		template = IO.read(File.join(template_directory, 'insert_select.sql.erb'))
+    template = if @create
+      IO.read(File.join(template_directory, 'create_table.sql.erb'))
+    else
+      FormatLoader.load_formats(@from_format) unless @from_format.nil?
+      from_table = get_table(@from_schema, @from_table)
+		  # mapping variable is used by ERB template
+      mapping = map_fields(from_table, to_table)
+  		IO.read(File.join(template_directory, 'insert_select.sql.erb'))
+    end
 		puts ERB.new(template).result(binding)
 	end
 
@@ -245,6 +249,10 @@ class GoCartSql < GoCartDef
 			words = value.split('=')
 			raise "Invalid replacement: #{value}" if words.size != 2
 			@replace_words[words.first] = words.last
+		end
+
+    opts.on('--create', 'generate create table sql for "to_table"') do
+  		@create = true
 		end
 
 		parse_def_options opts

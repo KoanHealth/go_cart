@@ -1,0 +1,4 @@
+<% to_table_max = to_table.fields.size - 1 %>
+CREATE TABLE <%= to_table.symbol %> (
+<% to_table.fields.each_with_index do |pair, index| %>    <%= pair.last.to_sql %><%= index == to_table_max ? '' : ',' %>
+<% end %>);

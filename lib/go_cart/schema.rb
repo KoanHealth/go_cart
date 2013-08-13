@@ -88,7 +88,44 @@ class SchemaField < CommonField
 		return s
 	end
 
+  def to_sql(options = {})
+    decimal_type_check
+    s = @symbol.to_s + ' '  + get_sql_type
+    s += ' NOT NULL' if !@null.nil? && !@null
+    s += ' DEFAULT(' + TypeUtils.format_value(@default, value) + ')' unless @default.nil?
+    return s
+  end
+
 private
+
+  def get_sql_type
+    case @type
+    when :string
+      return "VARCHAR(#{@limit || 50})"
+    when :text
+      return 'TEXT'
+    when :integer
+      return 'INTEGER'
+    when :float
+      return 'DOUBLE PRECISION'
+    when :decimal
+      return "DECIMAL(#{@precision}, #{@scale})"
+    when :datetime
+      return 'TIMESTAMP'
+    when :timestamp
+      return 'TIMESTAMP'
+    when :time
+      return 'TIMESTAMP'
+    when :date
+      return 'DATE'
+    when :binary
+      return 'BYTEA'
+    when :boolean
+      return 'BOOLEAN'
+    else
+      return @type.to_s
+    end
+  end
 
 	def decimal_type_check()
 		# This is kind of a hack but MySql defaults to DECIMAL(10,0)
