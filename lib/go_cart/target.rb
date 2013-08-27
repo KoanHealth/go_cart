@@ -7,7 +7,7 @@ class Target
 	attr_accessor :db_suffix, :db_schema
 
 	def get_table_name(symbol)
-		return @db_suffix.nil? ? symbol : (symbol.to_s + @db_suffix).to_sym
+		@db_suffix.nil? ? symbol : (symbol.to_s + @db_suffix).to_sym
 	end
 
 	def execute(dbconfig, sql_script)

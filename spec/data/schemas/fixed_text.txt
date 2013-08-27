@@ -1,0 +1,13 @@
+## Format: FixedText
+## Table: FixedText
+## Fields: Name, Type, Length, Truncate
+fixed1_id	Text	1	Yes
+fixed2_id	Text	2
+fixed3_id	Text	3	Yes
+fixed4_id	Text	4
+fixed5_id	Text	5	Yes
+fixed6_id	Text	6
+fixed7_id	Text	7	Yes
+fixed8_id	Text	8
+fixed9_id	Text	9	Yes
+fixed10_id	Text	10

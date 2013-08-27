@@ -20,7 +20,7 @@ class Generator
 protected
 
 	FORMAT_FIELDS = [ 'symbol', 'type', 'header', 'index', 'start', 'end', 'length', 'name', 'description' ]
-	SCHEMA_FIELDS = [ 'symbol', 'type', 'limit', 'null', 'default', 'precision', 'scale' ]
+	SCHEMA_FIELDS = [ 'symbol', 'type', 'limit', 'null', 'default', 'precision', 'scale', 'truncate' ]
 	ALLOWED_FIELDS = FORMAT_FIELDS | SCHEMA_FIELDS | [ 'ignore' ]
 
   attr_reader :module_name, :current_format, :current_schema, :current_format_table, :current_schema_table

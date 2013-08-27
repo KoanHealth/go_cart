@@ -1,0 +1,13 @@
+## Format: FixedString
+## Table: FixedString
+## Fields: Name, Type, Length, Truncate
+fixed1_id	String	1	Yes
+fixed2_id	String	2
+fixed3_id	String	3	Yes
+fixed4_id	String	4
+fixed5_id	String	5	Yes
+fixed6_id	String	6
+fixed7_id	String	7	Yes
+fixed8_id	String	8
+fixed9_id	String	9	Yes
+fixed10_id	String	10

@@ -84,6 +84,7 @@ private
 		default = get_value('default', values)
 		precision = get_value('precision', values)
 		scale = get_value('scale', values)
+    truncate = get_value('truncate', values)
 
 		options = Hash.new
 		
@@ -100,6 +101,7 @@ private
 		options[:default] = default unless default.nil?
 		options[:precision] = precision.to_i unless precision.nil?
 		options[:scale] = scale.to_i unless scale.nil?
+    options[:truncate] = parse_bool(truncate) unless truncate.nil?
 
 		true_type = TypeUtils.get_type_symbol(type || 'string')
 		raise "Unrecognized type: #{type}" if true_type.nil?
@@ -111,6 +113,18 @@ private
 		return nil if index.nil? || index >= values.size
 		values[index]
 	end
+
+  def parse_bool(s)
+    return nil if s.nil? || s.empty?
+    case s[0].downcase
+      when '1', 'y', 't'
+        return true
+      when '0', 'n', 'f'
+        return false
+      else
+        raise "Invalid boolean value: #{s}"
+    end
+  end
 
 end
 end

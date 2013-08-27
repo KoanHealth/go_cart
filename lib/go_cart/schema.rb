@@ -6,7 +6,7 @@ class Schema < CommonBase
 		table = SchemaTable.new(symbol, options)
 		code.call(table) if block_given?
 		add_table(table)
-		return table
+		table
 	end
 
 	def add_index(table, columns, options = {})
@@ -39,7 +39,7 @@ class SchemaTable < CommonTable
 		options[:options] = @options unless @options.nil?
 		options[:temporary] = @temporary unless @temporary.nil?
 		options[:force] = @force unless @force.nil?
-		return options
+		options
 	end
 
 	def get_parameters()
@@ -49,17 +49,21 @@ class SchemaTable < CommonTable
 		s += ", :options => #{@options.inspect}" unless @options.nil?
 		s += ", :temporary => #{@temporary}" unless @temporary.nil?
 		s += ", :force => #{@force}" unless @force.nil?
-		return s
+		s
 	end
 
 end
 
 class SchemaField < CommonField
 
-	attr_accessor :limit, :null, :default, :precision, :scale
+	attr_accessor :limit, :null, :default, :precision, :scale, :truncate
 
 	def format_value(value)
-		return TypeUtils.format_value(@type, value)
+    return nil if value.nil?
+    if !@limit.nil? && @truncate && [:text, :string].include?(@type)
+      value = value[0, @limit] if value.length > @limit
+    end
+    value
 	end
 
 	def get_options()
@@ -69,10 +73,11 @@ class SchemaField < CommonField
 		options[:default] = @default unless @default.nil?
 		options[:precision] = @precision unless @precision.nil?
 		options[:scale] = @scale unless @scale.nil?
-		if [:text, :string, :binary].include?(@type) && !!@limit
+    options[:truncate] = @truncate unless @truncate.nil?
+		if [:text, :string, :binary].include?(@type) && !@limit.nil?
 			options[:limit] = @limit
-		end
-		return options
+    end
+		options
 	end
 
 	def get_parameters()
@@ -81,22 +86,46 @@ class SchemaField < CommonField
 		s += ", :null => #{@null}" unless @null.nil?
 		s += ", :default => #{@default.inspect}" unless @default.nil?
 		s += ", :precision => #{@precision}" unless @precision.nil?
-		s += ", :scale => #{@scale}" unless @scale.nil?
-		if [:text, :string, :binary].include?(@type) && !!@limit
+    s += ", :scale => #{@scale}" unless @scale.nil?
+    s += ", :truncate => #{@truncate}" unless @truncate.nil?
+		if [:text, :string, :binary].include?(@type) && !@limit.nil?
 			s += ", :limit => #{@limit}"
 		end
-		return s
+		s
 	end
 
   def to_sql(options = {})
     decimal_type_check
     s = @symbol.to_s + ' '  + get_sql_type
     s += ' NOT NULL' if !@null.nil? && !@null
-    s += ' DEFAULT(' + TypeUtils.format_value(@default, value) + ')' unless @default.nil?
-    return s
+    s += ' DEFAULT(' + format_sql_value(@default, value) + ')' unless @default.nil?
+    s
   end
 
 private
+
+  def self.format_sql_value(type, value)
+    case type
+      when :string
+        return "'#{value}'"
+      when :integer
+        return value
+      when :date
+        value = Date.parse(value)
+        return "'#{value.year}-#{value.month}-#{value.day}'"
+      when :boolean
+        return value
+      when :decimal
+        return value
+      when :float
+        return value
+      when :datetime
+        value = DateTime.parse(value)
+        return "'#{value.year}-#{value.month}-#{value.day} #{value.hour}:#{value.minute}:#{value.second}'"
+      else
+        raise "Invalid type: #{type}"
+    end
+  end
 
   def get_sql_type
     case @type

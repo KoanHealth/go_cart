@@ -1,3 +1,5 @@
+require 'date'
+
 module GoCart
 class TypeUtils
 
@@ -71,10 +73,10 @@ class TypeUtils
 		# Other stuff
     when 'y', 'n', 't', 'f', '1', '0', 'yes', 'no', 'true', 'false'
 			return :boolean
-		when /^[+-]?\d+\.\d{3,}$/
+    when /^[+-]?\d+\.\d{1,2}$/
+ 			return :decimal
+		when /^[+-]?\d+\.\d+$/
 			return :float
-		when /^[+-]?\d+\.\d{2}$/
-			return :decimal
     when /^[+-]?\d{1,9}$/
       return :integer
 		else
