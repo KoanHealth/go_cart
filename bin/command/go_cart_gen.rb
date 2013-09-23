@@ -5,7 +5,7 @@ class GoCartGen < GoCartDef
 
 	attr_accessor :data_file, :schema_file, :format_file, :module_name, :class_name
 
-	def execute()
+	def execute
 		unless @schema_file.nil?
 			generator = setup_generator GeneratorFromSchema.new
 			generator.generate @schema_file, @format_file
@@ -17,11 +17,10 @@ class GoCartGen < GoCartDef
 	end
 
 	def setup_generator(generator)
-		template_directory = File.join(@script_dir, '../../templates')
-		generator.template_directory = template_directory
+		generator.template_directory = File.join(@script_dir, '../../templates')
 		generator.module_name = @module_name
 		generator.class_name = @class_name
-		return generator
+		generator
 	end
 
 	def parse_options(opts)

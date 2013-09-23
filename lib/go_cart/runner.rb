@@ -85,7 +85,6 @@ class Runner
           target.close
         end
 
-
         target.import(dbconfig, schema_table) if @bulk_load
       ensure
   			target.delete if bulk_delete unless target.nil?

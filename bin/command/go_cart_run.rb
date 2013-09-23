@@ -9,7 +9,7 @@ class GoCartRun < GoCartDef
 	attr_accessor :environment, :adapter, :database, :username, :password, :db_schema
 	attr_accessor :bulk_load, :bulk_filename, :use_import
 
-	def execute()
+	def execute
 		dbconfig = get_dbconfig
 		FormatLoader.load_formats(@format_file)
 
@@ -25,7 +25,10 @@ class GoCartRun < GoCartDef
 		if @just_create
 			schema = get_schema
 			raise "Must specify fully qualified schema or mapper class name" if schema.nil?
-      runner.create_schema_tables(dbconfig, get_schema, options)
+      runner.create_schema_tables(dbconfig, schema, options)
+      unless @data_file.nil?
+        runner.load_data_table(dbconfig, schema.tables.first[1], File.expand_path(@data_file), options)
+      end
     else
       runner.load_data_files(dbconfig, Dir.glob(File.expand_path(@data_file)), get_mapper, options)
 	  end
@@ -99,7 +102,7 @@ class GoCartRun < GoCartDef
   		@use_import = true
   	end
 
-   	opts.on('--create', 'just create database tables') do |value|
+   	opts.on('--create', 'just create database tables (data file not required)') do |value|
   		@just_create = true
   	end
 

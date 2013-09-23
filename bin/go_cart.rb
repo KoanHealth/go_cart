@@ -38,10 +38,10 @@ private
 
 	def parse_err_options(message, opts)
 		opts.banner = "Usage: #{$0} <COMMAND>"
-		opts.separator ""
-		opts.separator "Do some mapping chores"
-		opts.separator ""
-		opts.separator "COMMANDS:"
+		opts.separator ''
+		opts.separator 'Do some mapping chores'
+		opts.separator ''
+		opts.separator 'COMMANDS:'
 		opts.separator "\tGEN - Generate a format file from a data file or schema file"
 		opts.separator "\tVAL - Verify that data in a file conforms to the validation rules specified in a format file"
 		opts.separator "\tRUN - Insert data into a database using the specified format"

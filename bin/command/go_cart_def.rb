@@ -7,21 +7,21 @@ class GoCartDef
 
 	attr_accessor :verbose, :no_color, :left_overs
 
-	def initialize()
+	def initialize
 		@left_overs = []
 		@script_dir = File.expand_path(File.dirname(__FILE__))
 	end
 
 	def parse_def_options(opts)
-		opts.on("-v", "--verbose", "show verbose output") do
+		opts.on('-v', '--verbose', 'show verbose output') do
 			@verbose = true
 		end
 
-		opts.on("-c", "--nocolor", "do not colorize messages") do
+		opts.on('-c', '--nocolor', 'do not colorize messages') do
 			@no_color = true
 		end
 
-		opts.on("-h", "--help", "show this message") do
+		opts.on('-h', '--help', 'show this message') do
 			puts opts
 			exit false
 		end
@@ -41,7 +41,7 @@ class GoCartDef
 	end
 
 	def split_args(value)
-		return value.gsub(/^[\"\']/,'').gsub(/[\"\']$/,'').split(/\s*,\s*/)
+		return value.gsub(/^["']/,'').gsub(/["']$/,'').split(/\s*,\s*/)
 	end
 
 	def get_instance(class_name)

@@ -111,7 +111,7 @@ private
 
 	def self.sum_separators(separators, line)
 		# Remove a-zA-Z0-9_ and .+-'"\/() characters and count what is left
-		line = line.gsub(/\w+/, '').gsub(/[.+\-\'\"\ ]/, '')
+		line = line.gsub(/\w+/, '').gsub(/[.+\-'" ]/, '')
 		line.each_char { |ch| separators[ch] += 1 }
 	end
 
