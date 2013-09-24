@@ -24,7 +24,7 @@ class GoCartRun < GoCartDef
 		runner = Runner.new()
 		if @just_create
 			schema = get_schema
-			raise "Must specify fully qualified schema or mapper class name" if schema.nil?
+			raise 'Must specify fully qualified schema or mapper class name' if schema.nil?
       runner.create_schema_tables(dbconfig, schema, options)
       unless @data_file.nil?
         runner.load_data_table(dbconfig, schema.tables.first[1], File.expand_path(@data_file), options)
@@ -40,6 +40,10 @@ class GoCartRun < GoCartDef
 		opts.separator 'Maps and inserts data into a database using the specified format'
 		opts.separator ''
 		opts.separator 'OPTIONS:'
+
+    # These are better defaults
+    @use_import = false
+    @bulk_load = true
 
 		# Add arguments
 		opts.on('--format FORMATFILE[,...]', 'format filenames') do |value|
