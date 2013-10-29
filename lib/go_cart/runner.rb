@@ -72,7 +72,7 @@ class Runner
 
         target.open schema_table
         begin
-          mapping = file_mapper.get_mapping schema_table.symbol
+          mapping = file_mapper.get_mapping_for_format format_table
           loader.foreach(file, format_table) do |row, line_number|
             begin
               field_data = mapping.map_fields(row)

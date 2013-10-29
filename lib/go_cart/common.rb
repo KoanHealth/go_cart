@@ -76,7 +76,7 @@ class CommonTable
 	end
 
 	def matches?(headers)
-		if headers.size >= @fields.size
+		if headers.size == @fields.size
 			@fields.each do |symbol, field|
 				found_it = false
 				headers.each do |header|

@@ -29,6 +29,13 @@ class Mapper
 		return @mappings[symbol]
 	end
 
+  def get_mapping_for_format(format_table)
+    @mappings.each do |symbol, mapping|
+      return mapping if mapping.format_table.symbol == format_table.symbol
+    end
+    return nil
+  end
+
 	def get_schema_for_format(format_table)
 		@mappings.each do |symbol, mapping|
 			return mapping.schema_table if mapping.format_table.symbol == format_table.symbol
