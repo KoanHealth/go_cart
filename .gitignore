@@ -6,6 +6,7 @@
 
 # Ignore coverage data
 .last_run.json
+/coverage
 
 # Ignore bundler config
 /.bundle
