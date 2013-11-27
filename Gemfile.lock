@@ -69,3 +69,4 @@ DEPENDENCIES
   coveralls
   go_cart!
   rspec
+  simplecov
