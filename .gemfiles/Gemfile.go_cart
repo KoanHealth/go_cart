@@ -1,0 +1,13 @@
+source 'https://rubygems.org'
+gemspec path: '..'
+
+gem 'activerecord'
+gem 'activerecord-import'
+gem 'colorize'
+gem 'pg'
+gem 'rake'
+
+group :test do
+  gem 'coveralls', require: false
+  gem 'rspec'
+end

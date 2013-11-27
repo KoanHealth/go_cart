@@ -1,5 +1,8 @@
 gocart
 ======
+[![Build Status](https://secure.travis-ci.org/KoanHealth/go_cart.png?branch=master&.png)](http://travis-ci.org/KoanHealth/go_cart)
+[![Code Climate](https://codeclimate.com/github/KoanHealth/go_cart.png)](https://codeclimate.com/github/KoanHealth/go_cart)
+[![Coverage Status](https://coveralls.io/repos/KoanHealth/go_cart/badge.png?branch=master)](https://coveralls.io/r/KoanHealth/go_cart)
 
 A tool and library for managing CSV and fixed-length format data files
 
