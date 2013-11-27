@@ -2,9 +2,6 @@ require 'bundler/setup'
 
 
 require 'simplecov'
-SimpleCov.start do
-  add_filter 'app/secrets'
-end
 
 if ENV['TRAVIS']
   require 'coveralls'
