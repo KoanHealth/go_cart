@@ -1,6 +1,4 @@
 require 'bundler/setup'
-
-
 require 'simplecov'
 
 if ENV['TRAVIS']
